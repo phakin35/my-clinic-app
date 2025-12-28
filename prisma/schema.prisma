@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   @default("customer") // customer, reception, doctor
+  createdAt DateTime @default(now())
+}
+
+model Appointment {
+  id           Int      @id @default(autoincrement())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // ข้อมูลลูกค้าและสัตว์เลี้ยง
+  ownerName    String
+  petName      String
+  petType      String   // dog, cat, other
+  phone        String?
+  symptoms     String   @db.Text
+  
+  // ข้อมูลการนัดหมาย
+  appointmentDate DateTime?
+  isWalkIn        Boolean   @default(false)
+  
+  // สถานะ: pending (รอมาถึง), waiting (รอตรวจ), in_consult (กำลังตรวจ), pharmacy (รอจ่ายยา), completed (เสร็จสิ้น)
+  status          String    @default("pending")
+  
+  // ข้อมูลการรักษา (สำหรับหมอ)
+  diagnosis       String?   @db.Text
+  prescription    String?   @db.Text
+  price           Float?    @default(0.0)
+}
