@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,92 +9,116 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap');
-        body { font-family: 'Sarabun', sans-serif; }
-        .hidden-section { display: none; }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .hidden-section {
+            display: none;
+        }
+
         .hero-bg {
             background-image: url('https://image.springnews.co.th/uploads/images/contents/w1024/2023/02/v2lndUTOu19ngpbivyf6.webp');
             background-size: cover;
             background-position: center 20%;
         }
-        /* Glassmorphism Classes */
+
         .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.6);
         }
+
         .glass-btn {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
+
         .glass-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
         }
-        
-        /* Animations */
-        @keyframes blob {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(30px, -50px) scale(1.1); }
-            66% { transform: translate(-20px, 20px) scale(0.9); }
-            100% { transform: translate(0px, 0px) scale(1); }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.5;
+            }
         }
-        .animate-blob {
-            animation: blob 7s infinite;
+
+        .animate-blink {
+            animation: blink 2s infinite;
         }
-        .animation-delay-2000 {
-            animation-delay: 2s;
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
         }
-        .animation-delay-4000 {
-            animation-delay: 4s;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
+
 <body class="bg-slate-50 text-slate-700 antialiased selection:bg-teal-100 selection:text-teal-900">
 
     <!-- Navbar -->
-    <nav class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-white/50 transition-all duration-300">
+    <nav
+        class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-teal-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-20 items-center">
-                <!-- Logo -->
                 <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
-                    <div class="bg-gradient-to-br from-teal-400 to-teal-600 p-2.5 rounded-2xl text-white shadow-lg shadow-teal-200 group-hover:scale-105 transition duration-300">
+                    <div
+                        class="bg-gradient-to-br from-teal-400 to-teal-600 p-2.5 rounded-2xl text-white shadow-lg shadow-teal-200 group-hover:scale-105 transition duration-300">
                         <i data-lucide="paw-print" class="w-6 h-6"></i>
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-2xl font-extrabold tracking-tight leading-none text-slate-800">อาเเงว คลินิก</span>
+                        <span class="text-2xl font-extrabold tracking-tight leading-none text-slate-800">อาเเงว
+                            คลินิก</span>
                         <span class="text-xs font-bold tracking-widest text-orange-500 uppercase">Cat Dog Clinic</span>
                     </div>
                 </div>
 
-                <!-- Desktop Menu -->
                 <div class="hidden md:flex items-center gap-8">
-                    <button onclick="goHome()" class="text-gray-500 hover:text-teal-600 font-bold transition text-sm uppercase tracking-wide">หน้าแรก</button>
-                    <button onclick="scrollToSection('services')" class="text-gray-500 hover:text-teal-600 font-bold transition text-sm uppercase tracking-wide">บริการ</button>
-                    <button onclick="showAuthModal('login', 'doctor')" class="text-gray-400 hover:text-teal-600 font-medium flex items-center gap-1 transition text-sm">
+                    <button onclick="goHome()"
+                        class="text-gray-500 hover:text-teal-600 font-bold transition text-sm uppercase tracking-wide">หน้าแรก</button>
+                    <!-- 📺 ปุ่มเปิดจอคิว -->
+                    <button id="btn-queue-board" onclick="toggleQueueBoard()"
+                        class="hidden text-white bg-slate-800 hover:bg-slate-700 font-bold px-3 py-1.5 rounded-lg items-center gap-2 text-sm shadow-md transition">
+                        <i data-lucide="monitor" class="w-4 h-4"></i> จอเรียกคิว (TV)
+                    </button>
+                    <button onclick="showAuthModal('login', 'doctor')"
+                        class="text-gray-400 hover:text-teal-600 font-medium flex items-center gap-1 transition text-sm">
                         <i data-lucide="shield-check" class="w-4 h-4"></i> เจ้าหน้าที่
                     </button>
-                    
-                    <!-- User Status -->
                     <div id="nav-user-info" class="hidden flex items-center gap-4 ml-2 pl-6 border-l border-gray-200">
                         <div class="text-right">
                             <div id="user-display-name" class="text-sm font-bold text-slate-800">User</div>
-                            <div id="user-role-display" class="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full inline-block">Customer</div>
+                            <div id="user-role-display"
+                                class="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full inline-block">
+                                Customer</div>
                         </div>
-                        <button onclick="logout()" class="bg-slate-100 hover:bg-red-50 hover:text-red-500 p-2.5 rounded-full text-slate-400 transition shadow-sm">
+                        <button onclick="logout()"
+                            class="bg-slate-100 hover:bg-red-50 hover:text-red-500 p-2.5 rounded-full text-slate-400 transition shadow-sm">
                             <i data-lucide="log-out" class="w-5 h-5"></i>
                         </button>
                     </div>
-
-                    <!-- Login/Book Button -->
                     <div id="nav-auth-buttons" class="flex gap-3">
-                        <button onclick="showAuthModal('login')" class="px-5 py-2.5 text-slate-600 font-bold hover:bg-slate-100 rounded-full transition text-sm">เข้าสู่ระบบ</button>
-                        <button onclick="showAuthModal('register')" class="px-6 py-2.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold rounded-full shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm">
+                        <button onclick="showAuthModal('login')"
+                            class="px-5 py-2.5 text-slate-600 font-bold hover:bg-slate-100 rounded-full transition text-sm">เข้าสู่ระบบ</button>
+                        <button onclick="showAuthModal('register')"
+                            class="px-6 py-2.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold rounded-full shadow-lg shadow-orange-200 hover:shadow-orange-300 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm">
                             <i data-lucide="calendar-plus" class="w-4 h-4"></i> จองคิวออนไลน์
                         </button>
                     </div>
@@ -104,307 +129,258 @@
 
     <!-- Main Content -->
     <main>
-        <!-- 1. Landing Page (Public View) -->
+        <!-- Landing Page -->
         <div id="landing-page" class="animate-fade-in">
-            <!-- Hero Section -->
             <header class="hero-bg h-[600px] relative flex items-center">
-                <!-- Overlay Gradient -->
                 <div class="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-teal-900/40 to-transparent"></div>
-                
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
                     <div class="max-w-2xl space-y-6">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-semibold shadow-lg">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-semibold shadow-lg">
                             <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span> เปิดให้บริการทุกวัน
                         </div>
                         <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight drop-shadow-sm">
-                            เพื่อนซี้สี่ขา <br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-teal-400">เราดูแลด้วยใจ</span>
+                            เพื่อนซี้สี่ขา <br /> <span
+                                class="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-teal-400">เราดูแลด้วยใจ</span>
                         </h1>
                         <p class="text-lg md:text-xl text-slate-200 font-light max-w-lg leading-relaxed">
-                            ยกระดับคุณภาพชีวิตสัตว์เลี้ยงด้วยเทคโนโลยีที่ทันสมัย และทีมสัตวแพทย์ผู้เชี่ยวชาญ พร้อมบริการครบวงจรในที่เดียว
-                        </p>
+                            ยกระดับคุณภาพชีวิตสัตว์เลี้ยงด้วยเทคโนโลยีที่ทันสมัย และทีมสัตวแพทย์ผู้เชี่ยวชาญ</p>
                         <div class="pt-6 flex flex-col sm:flex-row gap-4">
-                            <!-- ปุ่มหลัก -->
-                            <button onclick="showAuthModal('register')" class="bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold py-4 px-10 rounded-full shadow-xl shadow-teal-900/30 transition transform hover:-translate-y-1 flex items-center justify-center gap-3">
-                                <i data-lucide="calendar-check"></i> นัดหมายล่วงหน้า
-                            </button>
-                            <!-- ปุ่ม Glass Style -->
-                            <button onclick="scrollToSection('services')" class="glass-btn text-lg font-bold py-4 px-10 rounded-full shadow-lg transition duration-300">
-                                บริการของเรา
-                            </button>
+                            <button onclick="showAuthModal('register')"
+                                class="bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold py-4 px-10 rounded-full shadow-xl">นัดหมายล่วงหน้า</button>
+                            <button onclick="scrollToSection('services')"
+                                class="glass-btn text-lg font-bold py-4 px-10 rounded-full shadow-lg transition duration-300">บริการของเรา</button>
                         </div>
                     </div>
                 </div>
             </header>
-
-            <!-- Stats Bar -->
-            <div class="bg-white/90 border-b border-gray-100 backdrop-blur-sm relative z-20 -mt-10 mx-4 md:mx-auto max-w-6xl rounded-2xl shadow-xl">
+            <div
+                class="bg-white/90 border-b border-gray-100 backdrop-blur-sm relative z-20 -mt-10 mx-4 md:mx-auto max-w-6xl rounded-2xl shadow-xl">
                 <div class="px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-gray-100">
                     <div>
                         <div class="text-3xl font-extrabold text-teal-600">10+</div>
-                        <div class="text-sm text-gray-500 font-medium">สัตวแพทย์ผู้เชี่ยวชาญ</div>
+                        <div class="text-sm text-gray-500 font-medium">สัตวแพทย์</div>
                     </div>
                     <div>
                         <div class="text-3xl font-extrabold text-orange-500">24h</div>
-                        <div class="text-sm text-gray-500 font-medium">ดูแลกรณีฉุกเฉิน</div>
+                        <div class="text-sm text-gray-500 font-medium">ฉุกเฉิน</div>
                     </div>
                     <div>
                         <div class="text-3xl font-extrabold text-slate-700">5k+</div>
-                        <div class="text-sm text-gray-500 font-medium">สัตว์เลี้ยงที่รักษาหาย</div>
+                        <div class="text-sm text-gray-500 font-medium">เคสรักษาหาย</div>
                     </div>
                     <div>
                         <div class="text-3xl font-extrabold text-teal-600">4.9</div>
-                        <div class="text-sm text-gray-500 font-medium">คะแนนความพึงพอใจ</div>
+                        <div class="text-sm text-gray-500 font-medium">คะแนน</div>
                     </div>
                 </div>
             </div>
-
             <!-- Services Section -->
+            
             <section id="services" class="py-24 bg-slate-50 relative overflow-hidden">
+            
                 <!-- Decoration Bubbles -->
-                <div class="absolute top-20 right-0 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-                <div class="absolute bottom-20 left-0 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-                <div class="absolute top-1/2 left-1/2 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-
+            
+                <div
+                    class="absolute top-20 right-0 w-80 h-80 bg-teal-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
+                </div>
+            
+                <div
+                    class="absolute bottom-20 left-0 w-80 h-80 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+                </div>
+            
+                <div
+                    class="absolute top-1/2 left-1/2 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+                </div>
+            
+            
+            
                 <div class="max-w-7xl mx-auto px-4 relative z-10">
+            
                     <div class="text-center mb-16 max-w-2xl mx-auto">
-                        <span class="text-orange-500 font-bold tracking-wider uppercase text-sm bg-orange-50 px-3 py-1 rounded-full">Services</span>
+            
+                        <span
+                            class="text-orange-500 font-bold tracking-wider uppercase text-sm bg-orange-50 px-3 py-1 rounded-full">Services</span>
+            
                         <h2 class="text-4xl font-extrabold text-slate-800 mt-4 mb-4">บริการครบวงจรเพื่อลูกรัก</h2>
-                        <p class="text-slate-500 text-lg">เราใส่ใจทุกรายละเอียดตั้งแต่การป้องกัน การรักษา ไปจนถึงการดูแลความสวยงาม</p>
+            
+                        <p class="text-slate-500 text-lg">เราใส่ใจทุกรายละเอียดตั้งแต่การป้องกัน การรักษา
+                            ไปจนถึงการดูแลความสวยงาม</p>
+            
                     </div>
-
+            
+            
+            
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <!-- Card 1 (Glass Effect) -->
-                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-teal-100/50 transition duration-300 group">
-                            <div class="w-16 h-16 bg-white text-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-500 group-hover:text-white transition duration-300 group-hover:rotate-6">
+            
+                        <div
+                            class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-teal-100/50 transition duration-300 group">
+            
+                            <div
+                                class="w-16 h-16 bg-white text-teal-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-teal-500 group-hover:text-white transition duration-300 group-hover:rotate-6">
+            
                                 <i data-lucide="stethoscope" class="w-8 h-8"></i>
+            
                             </div>
+            
                             <h3 class="text-2xl font-bold mb-3 text-slate-800">General Care</h3>
-                            <p class="text-slate-600 leading-relaxed mb-6">ตรวจสุขภาพทั่วไป ฉีดวัคซีน และการป้องกันเห็บหมัด ด้วยเวชภัณฑ์คุณภาพสูง</p>
-                            <a href="#" class="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border border-teal-200 text-teal-600 font-bold text-sm hover:bg-teal-50 transition">
-                                อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
+            
+                            <p class="text-slate-600 leading-relaxed mb-6">ตรวจสุขภาพทั่วไป ฉีดวัคซีน
+                                และการป้องกันเห็บหมัด ด้วยเวชภัณฑ์คุณภาพสูง</p>
+            
                         </div>
-                        <!-- Card 2 (Glass Effect) -->
-                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-orange-100/50 transition duration-300 group">
-                            <div class="w-16 h-16 bg-white text-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition duration-300 group-hover:-rotate-6">
+            
+                        <div
+                            class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-orange-100/50 transition duration-300 group">
+            
+                            <div
+                                class="w-16 h-16 bg-white text-orange-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition duration-300 group-hover:-rotate-6">
+            
                                 <i data-lucide="heart-pulse" class="w-8 h-8"></i>
+            
                             </div>
+            
                             <h3 class="text-2xl font-bold mb-3 text-slate-800">Surgery & Dental</h3>
-                            <p class="text-slate-600 leading-relaxed mb-6">ห้องผ่าตัดมาตรฐาน เครื่องดมยาสลบที่ปลอดภัย และบริการขูดหินปูนครบวงจร</p>
-                            <a href="#" class="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border border-orange-200 text-orange-500 font-bold text-sm hover:bg-orange-50 transition">
-                                อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
+            
+                            <p class="text-slate-600 leading-relaxed mb-6">ห้องผ่าตัดมาตรฐาน เครื่องดมยาสลบที่ปลอดภัย
+                                และบริการขูดหินปูนครบวงจร</p>
+            
                         </div>
-                        <!-- Card 3 (Glass Effect) -->
-                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-blue-100/50 transition duration-300 group">
-                            <div class="w-16 h-16 bg-white text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-blue-500 group-hover:text-white transition duration-300 group-hover:rotate-6">
+            
+                        <div
+                            class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl hover:shadow-blue-100/50 transition duration-300 group">
+            
+                            <div
+                                class="w-16 h-16 bg-white text-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-sm group-hover:bg-blue-500 group-hover:text-white transition duration-300 group-hover:rotate-6">
+            
                                 <i data-lucide="scissors" class="w-8 h-8"></i>
+            
                             </div>
+            
                             <h3 class="text-2xl font-bold mb-3 text-slate-800">Grooming & Spa</h3>
-                            <p class="text-slate-600 leading-relaxed mb-6">อาบน้ำตัดขนโดยช่างผู้ชำนาญการ ใช้ผลิตภัณฑ์ออร์แกนิก อ่อนโยนต่อผิวหนัง</p>
-                            <a href="#" class="inline-flex items-center justify-center w-full py-3 px-4 rounded-xl border border-blue-200 text-blue-500 font-bold text-sm hover:bg-blue-50 transition">
-                                อ่านเพิ่มเติม <i data-lucide="arrow-right" class="w-4 h-4 ml-1"></i>
-                            </a>
+            
+                            <p class="text-slate-600 leading-relaxed mb-6">อาบน้ำตัดขนโดยช่างผู้ชำนาญการ
+                                ใช้ผลิตภัณฑ์ออร์แกนิก อ่อนโยนต่อผิวหนัง</p>
+            
                         </div>
+            
                     </div>
+            
                 </div>
+            
             </section>
-
-            <!-- Footer -->
-            <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                        <!-- Col 1: Brand -->
-                        <div>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="bg-teal-600 p-1.5 rounded-lg text-white">
-                                    <i data-lucide="paw-print" class="w-5 h-5"></i>
-                                </div>
-                                <span class="text-xl font-extrabold text-white tracking-tight">HappyPet</span>
-                            </div>
-                            <p class="text-sm text-slate-400 leading-relaxed">
-                                คลินิกรักษาสัตว์ที่ทันสมัยที่สุดในย่านนี้ เราพร้อมดูแลเพื่อนซี้สี่ขาของคุณด้วยความรักและมาตรฐานวิชาชีพ
-                            </p>
-                        </div>
-                        <!-- Col 2: Links -->
-                        <div>
-                            <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">เมนูหลัก</h4>
-                            <ul class="space-y-2 text-sm">
-                                <li><a href="#" onclick="goHome()" class="hover:text-teal-400 transition">หน้าแรก</a></li>
-                                <li><a href="#" onclick="scrollToSection('services')" class="hover:text-teal-400 transition">บริการของเรา</a></li>
-                                <li><a href="#" onclick="showAuthModal('login')" class="hover:text-teal-400 transition">เข้าสู่ระบบ</a></li>
-                                <li><a href="#" onclick="showAuthModal('register')" class="hover:text-teal-400 transition">จองคิวออนไลน์</a></li>
-                            </ul>
-                        </div>
-                        <!-- Col 3: Contact -->
-                        <div>
-                            <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">ติดต่อเรา</h4>
-                            <ul class="space-y-2 text-sm">
-                                <li class="flex items-start gap-2">
-                                    <i data-lucide="map-pin" class="w-4 h-4 mt-1 text-teal-500"></i>
-                                    <span>123 ถ.สุขุมวิท เขตวัฒนา<br>กรุงเทพมหานคร 10110</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <i data-lucide="phone" class="w-4 h-4 text-teal-500"></i>
-                                    <span>02-123-4567</span>
-                                </li>
-                                <li class="flex items-center gap-2">
-                                    <i data-lucide="mail" class="w-4 h-4 text-teal-500"></i>
-                                    <span>hello@happypet.com</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <!-- Col 4: Social -->
-                        <div>
-                            <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">ติดตามข่าวสาร</h4>
-                            <div class="flex gap-4">
-                                <a href="#" class="bg-slate-800 p-2 rounded-full hover:bg-teal-600 hover:text-white transition"><i data-lucide="facebook" class="w-5 h-5"></i></a>
-                                <a href="#" class="bg-slate-800 p-2 rounded-full hover:bg-green-500 hover:text-white transition"><i data-lucide="message-circle" class="w-5 h-5"></i></a> <!-- Line alternative -->
-                                <a href="#" class="bg-slate-800 p-2 rounded-full hover:bg-pink-500 hover:text-white transition"><i data-lucide="instagram" class="w-5 h-5"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">
-                        &copy; 2025 HappyPet Clinic. All rights reserved.
-                    </div>
-                </div>
-            </footer>
         </div>
 
-        <!-- 2. Application Dashboard (Logged In View) -->
+        <!-- 2. Application Screen -->
         <div id="app-screen" class="hidden-section max-w-7xl mx-auto p-4 md:p-8 min-h-screen">
-            
-            <!-- Customer View -->
-            <section id="role-customer" class="hidden-section animate-fade-in">
+
+            <!-- A. Customer View -->
+            <section id="role-customer" class="hidden-section fade-in">
                 <div class="flex flex-col lg:flex-row gap-8">
-                    <!-- Booking Form -->
                     <div class="lg:w-1/3">
-                        <div class="bg-white rounded-3xl shadow-xl shadow-slate-200 p-8 border border-slate-100 sticky top-28">
-                            <div class="flex items-center gap-3 mb-6">
-                                <div class="bg-teal-100 p-2.5 rounded-xl text-teal-600">
-                                    <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                        <div class="glass-panel p-6 rounded-2xl shadow-lg border-t-4 border-teal-500 sticky top-24">
+                            <h2 class="text-2xl font-bold text-teal-800 mb-4 flex items-center gap-2"><i
+                                    data-lucide="calendar-plus"></i> จองคิวตรวจ</h2>
+                            <form onsubmit="handleBooking(event)" class="space-y-4">
+                                <input type="text" id="cust-ownerName" name="ownerName" readonly
+                                    class="w-full bg-slate-100 border-0 rounded-lg p-2.5 text-slate-500 text-sm cursor-not-allowed">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input name="petName" required placeholder="ชื่อสัตว์เลี้ยง"
+                                        class="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                                    <select name="petType"
+                                        class="w-full border p-2 rounded-lg bg-white outline-none focus:ring-2 focus:ring-teal-500">
+                                        <option value="dog">สุนัข</option>
+                                        <option value="cat">แมว</option>
+                                        <option value="other">อื่นๆ</option>
+                                    </select>
                                 </div>
-                                <h2 class="text-2xl font-bold text-slate-800">จองคิวตรวจ</h2>
-                            </div>
-                            
-                            <form onsubmit="handleBooking(event)" class="space-y-5">
-                                <div class="relative">
-                                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1 block">ชื่อเจ้าของ</label>
-                                    <input type="text" name="ownerName" id="cust-ownerName" readonly class="w-full bg-slate-50 border-0 rounded-xl p-3.5 text-slate-600 font-medium focus:ring-0">
+                                <div class="grid grid-cols-3 gap-2">
+                                    <input name="breed" placeholder="พันธุ์" class="border p-2 rounded-lg text-sm">
+                                    <input name="weight" placeholder="นน." class="border p-2 rounded-lg text-sm">
+                                    <input name="height" placeholder="สูง" class="border p-2 rounded-lg text-sm">
                                 </div>
-                                
-                                <div>
-                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">สัตว์เลี้ยง</label>
-                                    <div class="flex gap-3">
-                                        <input type="text" name="petName" placeholder="ชื่อ (เช่น มอมแมม)" required class="flex-1 bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 focus:border-transparent outline-none transition">
-                                        <select name="petType" class="bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 outline-none w-32 cursor-pointer">
-                                            <option value="dog">🐶 สุนัข</option>
-                                            <option value="cat">🐱 แมว</option>
-                                        </select>
-                                    </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" name="date" required class="w-full border p-2 rounded-lg">
+                                    <select name="timeSlot" required class="w-full border p-2 rounded-lg bg-white">
+                                        <option value="" disabled selected>เลือกช่วงเวลา...</option>
+                                        <option value="09:00-09:30">09:00</option>
+                                        <option value="09:30-10:00">09:30</option>
+                                        <option value="10:00-10:30">10:00</option>
+                                        <option value="10:30-11:00">10:30</option>
+                                        <option value="11:00-11:30">11:00</option>
+                                        <option value="13:00-13:30">13:00</option>
+                                        <option value="13:30-14:00">13:30</option>
+                                        <option value="14:00-14:30">14:00</option>
+                                        <option value="14:30-15:00">14:30</option>
+                                    </select>
                                 </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">วันที่</label>
-                                        <input type="date" name="date" required class="w-full bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 outline-none">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">เวลา</label>
-                                        <input type="time" name="time" required class="w-full bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 outline-none">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">เบอร์โทรศัพท์</label>
-                                    <input type="tel" name="phone" placeholder="08x-xxx-xxxx" required class="w-full bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 outline-none">
-                                </div>
-                                
-                                <div>
-                                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5 block">อาการ / สาเหตุ</label>
-                                    <textarea name="symptoms" rows="3" placeholder="ระบุอาการเบื้องต้น..." required class="w-full bg-white border border-slate-200 rounded-xl p-3.5 focus:ring-2 focus:ring-teal-500 outline-none resize-none"></textarea>
-                                </div>
-                                
-                                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-teal-200 hover:bg-teal-700 hover:shadow-teal-300 transition transform hover:-translate-y-0.5">
-                                    ยืนยันการนัดหมาย
-                                </button>
+                                <textarea name="symptoms" placeholder="อาการเบื้องต้น" required
+                                    class="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                                <input type="hidden" name="phone" value="-" />
+                                <button type="submit"
+                                    class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 shadow-lg">ยืนยันการจอง</button>
                             </form>
                         </div>
                     </div>
-
-                    <!-- History List -->
                     <div class="lg:w-2/3">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="bg-orange-100 p-2.5 rounded-xl text-orange-600">
-                                <i data-lucide="history" class="w-6 h-6"></i>
-                            </div>
-                            <h2 class="text-2xl font-bold text-slate-800">ประวัติการนัดหมายของคุณ</h2>
-                        </div>
-                        
-                        <div id="customerHistory" class="space-y-4">
-                            <!-- Populated by JS -->
-                            <div class="p-12 text-center bg-white rounded-3xl border border-dashed border-slate-200 text-slate-400 flex flex-col items-center">
-                                <i data-lucide="calendar-off" class="w-12 h-12 mb-3 text-slate-200"></i>
-                                กำลังโหลดข้อมูล...
-                            </div>
-                        </div>
+                        <h2 class="text-2xl font-bold text-slate-700 mb-4 flex items-center gap-2"><i
+                                data-lucide="history" class="text-orange-500"></i> ประวัติการนัดหมายของคุณ</h2>
+                        <div id="customerHistory" class="space-y-3"></div>
                     </div>
                 </div>
             </section>
 
-            <!-- Reception View -->
-            <section id="role-reception" class="hidden-section animate-fade-in">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <!-- B. Reception View -->
+            <section id="role-reception" class="hidden-section fade-in">
+                <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-3xl font-extrabold text-slate-800">Reception Dashboard</h2>
+                        <h2 class="text-3xl font-bold text-slate-800">งานต้อนรับ (Reception)</h2>
                         <p class="text-slate-500 mt-1">จัดการคิวและทะเบียนผู้ป่วย</p>
                     </div>
-                    <button onclick="document.getElementById('walkInModal').classList.remove('hidden')" class="bg-indigo-600 text-white px-6 py-3 rounded-full font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-indigo-300 flex items-center gap-2 transition transform hover:-translate-y-0.5">
-                        <i data-lucide="plus-circle" class="w-5 h-5"></i> ลงทะเบียน Walk-in
-                    </button>
+                    <button onclick="document.getElementById('walkInModal').classList.remove('hidden')"
+                        class="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow hover:bg-indigo-700 flex items-center gap-2 transition"><i
+                            data-lucide="plus"></i> ลงทะเบียน Walk-in</button>
                 </div>
-                
-                <!-- Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-                        <div class="absolute right-0 top-0 w-24 h-24 bg-yellow-100 rounded-bl-full -mr-4 -mt-4 opacity-50 transition group-hover:scale-110"></div>
-                        <div class="relative z-10">
-                            <div class="text-xs text-yellow-600 uppercase font-bold tracking-wider mb-1">รอเช็คอิน</div>
-                            <div class="text-4xl font-extrabold text-slate-800" id="stat-pending">0</div>
-                        </div>
+
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-4 rounded-3xl border-l-4 border-yellow-400">
+                        <div class="text-xs text-yellow-600 font-bold uppercase">รอเช็คอิน</div>
+                        <div class="text-3xl font-extrabold text-slate-800" id="stat-pending">0</div>
                     </div>
-                    <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-                        <div class="absolute right-0 top-0 w-24 h-24 bg-teal-100 rounded-bl-full -mr-4 -mt-4 opacity-50 transition group-hover:scale-110"></div>
-                        <div class="relative z-10">
-                            <div class="text-xs text-teal-600 uppercase font-bold tracking-wider mb-1">รอตรวจ</div>
-                            <div class="text-4xl font-extrabold text-slate-800" id="stat-waiting">0</div>
-                        </div>
+                    <div class="glass-panel p-4 rounded-3xl border-l-4 border-teal-500">
+                        <div class="text-xs text-teal-600 font-bold uppercase">รอตรวจ</div>
+                        <div class="text-3xl font-extrabold text-slate-800" id="stat-waiting">0</div>
                     </div>
-                     <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-                        <div class="absolute right-0 top-0 w-24 h-24 bg-purple-100 rounded-bl-full -mr-4 -mt-4 opacity-50 transition group-hover:scale-110"></div>
-                        <div class="relative z-10">
-                            <div class="text-xs text-purple-600 uppercase font-bold tracking-wider mb-1">รอชำระเงิน</div>
-                            <div class="text-4xl font-extrabold text-slate-800" id="stat-pharmacy">0</div>
-                        </div>
+                    <div class="glass-panel p-4 rounded-3xl border-l-4 border-purple-500">
+                        <div class="text-xs text-purple-600 font-bold uppercase">รอชำระเงิน</div>
+                        <div class="text-3xl font-extrabold text-slate-800" id="stat-pharmacy">0</div>
                     </div>
-                     <div class="glass-panel p-6 rounded-3xl relative overflow-hidden group">
-                        <div class="absolute right-0 top-0 w-24 h-24 bg-green-100 rounded-bl-full -mr-4 -mt-4 opacity-50 transition group-hover:scale-110"></div>
-                        <div class="relative z-10">
-                            <div class="text-xs text-green-600 uppercase font-bold tracking-wider mb-1">เสร็จสิ้น</div>
-                            <div class="text-4xl font-extrabold text-slate-800" id="stat-completed">0</div>
-                        </div>
+                    <div class="glass-panel p-4 rounded-3xl border-l-4 border-green-500">
+                        <div class="text-xs text-green-600 font-bold uppercase">เสร็จสิ้น</div>
+                        <div class="text-3xl font-extrabold text-slate-800" id="stat-completed">0</div>
                     </div>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="mb-6 relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="text-slate-400 w-5 h-5"></i>
+                    </div>
+                    <input type="text" id="searchInput" onkeyup="loadAppointments()"
+                        placeholder="🔍 ค้นหาชื่อเจ้าของ, ชื่อสัตว์เลี้ยง, เบอร์โทร..."
+                        class="w-full bg-white border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-slate-600 shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition text-lg">
                 </div>
 
                 <div class="bg-white rounded-3xl shadow-xl shadow-slate-100 border border-slate-100 overflow-hidden">
                     <table class="w-full text-left">
                         <thead class="bg-slate-50/80 border-b border-slate-100">
                             <tr>
-                                <th class="p-5 font-bold text-slate-500 text-sm uppercase tracking-wide">เวลา/สถานะ</th>
-                                <th class="p-5 font-bold text-slate-500 text-sm uppercase tracking-wide">สัตว์เลี้ยง</th>
-                                <th class="p-5 font-bold text-slate-500 text-sm uppercase tracking-wide">เจ้าของ</th>
-                                <th class="p-5 font-bold text-slate-500 text-sm uppercase tracking-wide">อาการ</th>
-                                <th class="p-5 font-bold text-slate-500 text-sm uppercase tracking-wide text-right">จัดการ</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm">คิว (Queue)</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm">เวลา</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm">ผู้ป่วย</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm">เจ้าของ</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm">สถานะ</th>
+                                <th class="p-5 font-bold text-slate-500 text-sm text-right">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody id="receptionTable" class="divide-y divide-slate-50"></tbody>
@@ -412,65 +388,47 @@
                 </div>
             </section>
 
-            <!-- Doctor View -->
-            <section id="role-doctor" class="hidden-section animate-fade-in">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-140px)]">
-                    <!-- Queue List -->
-                    <div class="bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 overflow-hidden flex flex-col">
-                        <div class="p-5 bg-teal-50 border-b border-teal-100/50 font-bold text-teal-800 flex items-center gap-2">
-                            <i data-lucide="list" class="w-5 h-5"></i> คิวรอตรวจวันนี้
-                        </div>
-                        <div id="doctorList" class="divide-y divide-slate-50 overflow-y-auto flex-1 p-2 space-y-2"></div>
+            <!-- C. Doctor View -->
+            <section id="role-doctor" class="hidden-section fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+                    <!-- รายชื่อคิวรอ -->
+                    <div class="bg-white rounded-2xl shadow border overflow-hidden flex flex-col">
+                        <div class="p-4 bg-teal-50 border-b font-bold text-teal-800 flex items-center gap-2"><i
+                                data-lucide="list"></i> คิวรอตรวจ</div>
+                        <div id="doctorList" class="divide-y overflow-y-auto flex-1"></div>
                     </div>
-                    
-                    <!-- Exam Room -->
-                    <div class="lg:col-span-2 bg-white rounded-3xl shadow-xl shadow-slate-200 border border-slate-100 flex flex-col relative overflow-hidden">
-                        <div id="no-exam" class="absolute inset-0 flex flex-col items-center justify-center text-slate-300 bg-slate-50/50">
-                            <div class="bg-white p-6 rounded-full shadow-sm mb-4">
-                                <i data-lucide="stethoscope" class="w-12 h-12 text-teal-200"></i>
-                            </div>
-                            <p class="font-medium">เลือกคนไข้จากรายการด้านซ้ายเพื่อเริ่มตรวจ</p>
+
+                    <!-- ห้องตรวจ (Exam Room) -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow border flex flex-col relative">
+                        <div id="no-exam"
+                            class="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                            <i data-lucide="stethoscope" class="w-16 h-16 mb-2 opacity-50"></i>
+                            <p>เลือกผู้ป่วยจากรายการเพื่อเริ่มตรวจ</p>
                         </div>
-                        
                         <div id="exam-room" class="hidden flex flex-col h-full">
-                            <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/50">
+                            <div class="p-6 border-b bg-blue-50 flex justify-between items-center">
                                 <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <h3 id="exam-title" class="text-2xl font-extrabold text-slate-800">...</h3>
-                                        <span class="bg-teal-100 text-teal-700 text-xs font-bold px-2.5 py-1 rounded-full">กำลังตรวจ</span>
-                                    </div>
-                                    <p class="text-sm text-slate-500 font-medium" id="exam-subtitle">...</p>
+                                    <h3 id="exam-title" class="text-xl font-bold text-blue-900">...</h3>
+                                    <p class="text-sm text-slate-500" id="exam-subtitle">...</p>
                                 </div>
-                                <button onclick="cancelExam()" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-200 transition">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
-                                </button>
+                                <div class="text-right text-xs text-slate-500 bg-white p-2 rounded border">
+                                    <div id="exam-details-mini"></div>
+                                </div>
                             </div>
-                            
-                            <div class="p-8 space-y-6 overflow-y-auto flex-1">
+                            <div class="p-6 space-y-4 flex-1 overflow-y-auto">
                                 <input type="hidden" id="exam-id">
-                                <div>
-                                    <label class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                        <i data-lucide="activity" class="w-4 h-4 text-teal-500"></i> ผลการวินิจฉัย (Diagnosis)
-                                    </label>
-                                    <textarea id="doc-diagnosis" class="w-full bg-slate-50 border border-slate-200 p-4 h-32 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none resize-none transition" placeholder="ระบุรายละเอียดผลการตรวจ..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="text-sm font-bold text-slate-700 mb-2 flex items-center gap-2">
-                                        <i data-lucide="pill" class="w-4 h-4 text-orange-500"></i> รายการยาและการรักษา (Rx)
-                                    </label>
-                                    <textarea id="doc-prescription" class="w-full bg-slate-50 border border-slate-200 p-4 h-32 rounded-2xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none resize-none transition" placeholder="ระบุรายการยาและวิธีใช้..."></textarea>
-                                </div>
-                                <div>
-                                    <label class="text-sm font-bold text-slate-700 mb-2">ค่ารักษา (บาท)</label>
-                                    <input type="number" id="doc-price" class="bg-slate-50 border border-slate-200 p-3 w-48 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition font-mono" placeholder="0.00">
-                                </div>
+                                <textarea id="doc-diagnosis"
+                                    class="w-full border p-3 h-32 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    placeholder="ผลการวินิจฉัย (Diagnosis)"></textarea>
+                                <textarea id="doc-prescription"
+                                    class="w-full border p-3 h-32 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                    placeholder="สั่งจ่ายยา (Prescription)"></textarea>
                             </div>
-                            
-                            <div class="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end gap-3">
-                                <button onclick="cancelExam()" class="px-6 py-3 text-slate-500 font-bold hover:bg-slate-200 rounded-xl transition">ยกเลิก</button>
-                                <button onclick="submitExam()" class="bg-teal-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-teal-200 hover:bg-teal-700 hover:shadow-teal-300 transition transform hover:-translate-y-0.5 flex items-center gap-2">
-                                    <i data-lucide="save" class="w-4 h-4"></i> บันทึกและส่งต่อ
-                                </button>
+                            <div class="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                                <button onclick="cancelExam()"
+                                    class="px-4 py-2 text-slate-500 hover:bg-gray-200 rounded-lg">ยกเลิก</button>
+                                <button onclick="submitExam()"
+                                    class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold shadow hover:bg-blue-700">บันทึกส่งห้องยา</button>
                             </div>
                         </div>
                     </div>
@@ -479,384 +437,506 @@
         </div>
     </main>
 
-    <!-- AUTH MODAL -->
-    <div id="authModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[60] p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300 relative" id="authModalContent">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-300 hover:text-slate-500 p-1 rounded-full hover:bg-slate-100 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <div class="p-8 pb-0">
-                <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-4">
-                    <i data-lucide="paw-print" class="w-6 h-6"></i>
+    <!-- 📺 QUEUE BOARD (Full Screen) -->
+    <div id="queueBoard" class="hidden fixed inset-0 z-[100] bg-slate-900 text-white flex flex-col">
+        <div class="flex justify-between items-center p-6 border-b border-slate-700 bg-slate-800">
+            <div class="flex items-center gap-4">
+                <div class="bg-teal-500 p-2 rounded-lg"><i data-lucide="monitor" class="w-8 h-8"></i></div>
+                <div>
+                    <h1 class="text-3xl font-bold">ลำดับคิวรับบริการ</h1>
+                    <p class="text-slate-400">Queue Monitor</p>
                 </div>
-                <h3 class="font-extrabold text-2xl text-slate-800" id="authModalTitle">เข้าสู่ระบบ</h3>
-                <p class="text-slate-500 text-sm mt-1">ยินดีต้อนรับสู่ครอบครัว HappyPet Clinic</p>
             </div>
-            
-            <!-- Login Form -->
-            <form id="loginForm" class="p-8 pt-6 space-y-4">
-                <div>
-                    <input type="text" name="username" placeholder="ชื่อผู้ใช้งาน (Username)" required class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
+            <button onclick="toggleQueueBoard()"
+                class="text-slate-400 hover:text-white bg-slate-700 p-2 rounded-full"><i data-lucide="x"
+                    class="w-6 h-6"></i></button>
+        </div>
+        <div class="flex-1 grid grid-cols-3 divide-x divide-slate-700">
+            <div
+                class="col-span-2 p-12 flex flex-col items-center justify-center bg-slate-900 relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-900/20 to-teal-900/20"></div>
+                <h2 class="text-4xl font-bold text-teal-400 mb-8 uppercase tracking-widest relative z-10">กำลังตรวจ /
+                    Calling</h2>
+                <div id="board-current" class="text-center relative z-10 w-full">
+                    <div class="text-slate-500 text-2xl">...</div>
                 </div>
-                <div>
-                    <input type="password" name="password" placeholder="รหัสผ่าน" required class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
+            </div>
+            <div class="col-span-1 flex flex-col bg-slate-800/50">
+                <div class="flex-1 p-6 border-b border-slate-700">
+                    <h3 class="text-xl font-bold text-orange-400 mb-4 flex items-center gap-2"><i
+                            data-lucide="clock"></i> คิวรอตรวจ (Waiting)</h3>
+                    <div id="board-waiting" class="space-y-3"></div>
                 </div>
-                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-teal-200 hover:bg-teal-700 hover:shadow-teal-300 transition transform hover:-translate-y-0.5 mt-2">เข้าสู่ระบบ</button>
-                <div class="text-center text-sm text-slate-400 mt-6">
-                    ยังไม่มีบัญชี? <a href="#" onclick="toggleAuthMode('register')" class="text-teal-600 font-bold hover:underline">สมัครสมาชิกใหม่</a>
+                <div class="flex-1 p-6 bg-slate-800">
+                    <h3 class="text-xl font-bold text-purple-400 mb-4 flex items-center gap-2"><i
+                            data-lucide="pill"></i> รอรับยา (Pharmacy)</h3>
+                    <div id="board-pharmacy" class="space-y-3"></div>
                 </div>
-            </form>
+            </div>
+        </div>
+    </div>
 
-            <!-- Register Form -->
-            <form id="registerForm" class="hidden-section p-8 pt-6 space-y-4">
-                <div class="p-3 bg-orange-50 text-orange-700 text-xs font-semibold rounded-xl border border-orange-100 mb-2 flex items-start gap-2">
-                    <i data-lucide="info" class="w-4 h-4 mt-0.5 flex-shrink-0"></i> สำหรับลูกค้าทั่วไป เพื่อจองคิวออนไลน์
-                </div>
-                <input type="text" name="name" placeholder="ชื่อ-นามสกุล ของคุณ" required class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
-                <input type="text" name="username" placeholder="ตั้งชื่อผู้ใช้งาน (Username)" required class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
-                <input type="password" name="password" placeholder="ตั้งรหัสผ่าน" required class="w-full bg-slate-50 border border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-teal-500 focus:bg-white outline-none transition">
-                
-                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-teal-200 hover:bg-teal-700 hover:shadow-teal-300 transition transform hover:-translate-y-0.5 mt-2">สมัครสมาชิก</button>
-                <div class="text-center text-sm text-slate-400 mt-6">
-                    มีบัญชีอยู่แล้ว? <a href="#" onclick="toggleAuthMode('login')" class="text-teal-600 font-bold hover:underline">เข้าสู่ระบบ</a>
-                </div>
+    <!-- Modals -->
+    <div id="authModal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+            <button onclick="document.getElementById('authModal').classList.add('hidden')"
+                class="absolute top-4 right-4"><i data-lucide="x"></i></button>
+            <h3 id="authModalTitle" class="text-xl font-bold mb-4">เข้าสู่ระบบ</h3>
+            <form id="loginForm" class="space-y-3">
+                <input name="username" placeholder="Username" required class="w-full border p-3 rounded-lg">
+                <input type="password" name="password" placeholder="Password" required
+                    class="w-full border p-3 rounded-lg">
+                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg">Log In</button>
+                <div class="text-center text-sm text-blue-600 cursor-pointer hover:underline"
+                    onclick="toggleAuthMode('register')">สมัครสมาชิกใหม่</div>
+            </form>
+            <form id="registerForm" class="hidden-section space-y-3">
+                <input name="name" placeholder="ชื่อ-นามสกุล" required class="w-full border p-3 rounded-lg">
+                <input name="username" placeholder="ตั้ง Username" required class="w-full border p-3 rounded-lg">
+                <input type="password" name="password" placeholder="ตั้ง Password" required
+                    class="w-full border p-3 rounded-lg">
+                <button type="submit"
+                    class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg">Register</button>
+                <div class="text-center text-sm text-blue-600 cursor-pointer hover:underline"
+                    onclick="toggleAuthMode('login')">มีบัญชีแล้ว?</div>
             </form>
         </div>
     </div>
 
-    <!-- Walk-in Modal -->
-    <div id="walkInModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl relative">
-            <button onclick="document.getElementById('walkInModal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-300 hover:text-slate-500"><i data-lucide="x" class="w-6 h-6"></i></button>
-            
-            <h3 class="text-2xl font-extrabold mb-6 text-slate-800">ลงทะเบียน Walk-in</h3>
-            <form onsubmit="handleWalkIn(event)" class="space-y-4">
-                <input name="ownerName" placeholder="ชื่อเจ้าของ" required class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                <div class="flex gap-3">
-                    <input name="petName" placeholder="สัตว์เลี้ยง" required class="flex-1 bg-slate-50 border border-slate-200 p-3.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                    <select name="petType" class="bg-slate-50 border border-slate-200 p-3.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"><option value="dog">สุนัข</option><option value="cat">แมว</option></select>
+    <div id="paymentModal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 relative">
+            <button onclick="closePaymentModal()" class="absolute top-4 right-4"><i data-lucide="x"></i></button>
+            <h3 class="text-xl font-bold text-purple-800 mb-2">สรุปค่าใช้จ่าย</h3>
+            <div class="bg-purple-50 p-4 rounded-lg mb-4 text-sm space-y-2">
+                <p><strong>ผลวินิจฉัย:</strong> <span id="pay-diag">-</span></p>
+                <p><strong>รายการยา:</strong> <span id="pay-rx">-</span></p>
+            </div>
+            <form onsubmit="submitPayment(event)" class="space-y-4"><input type="hidden" id="pay-id"><input
+                    type="number" id="pay-price" required class="w-full border p-3 rounded-lg text-xl text-right"
+                    placeholder="0.00"><button type="submit"
+                    class="w-full bg-purple-600 text-white px-6 py-2 rounded-lg font-bold">ยืนยันรับเงิน</button></form>
+        </div>
+    </div>
+
+    <div id="detailsModal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[80] p-4">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-0 overflow-hidden relative">
+            <div class="bg-teal-600 p-4 text-white flex justify-between">
+                <h3 class="font-bold">รายละเอียด</h3><button
+                    onclick="document.getElementById('detailsModal').classList.add('hidden')"><i
+                        data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <div class="flex gap-4 border-b pb-4">
+                    <div class="text-3xl bg-slate-100 w-16 h-16 rounded-full flex items-center justify-center"><span
+                            id="det-queueNo" class="text-xl font-bold text-teal-700">Q---</span></div>
+                    <div>
+                        <h4 class="text-xl font-bold" id="det-petName">...</h4>
+                        <p class="text-sm text-slate-500" id="det-petInfo">...</p>
+                    </div>
                 </div>
-                <textarea name="symptoms" placeholder="อาการเบื้องต้น" required class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" rows="3"></textarea>
-                
-                <div class="pt-2">
-                    <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3.5 rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition">ลงทะเบียน</button>
+                <div class="grid grid-cols-2 text-sm">
+                    <div><span class="text-slate-400 block">เจ้าของ</span><span id="det-owner">...</span></div>
+                    <div><span class="text-slate-400 block">เวลา</span><span id="det-date">...</span></div>
                 </div>
+                <div><span class="text-slate-400 text-xs block">อาการ</span>
+                    <p id="det-symptoms" class="text-sm">...</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded"><span class="text-blue-500 text-xs block">ผลวินิจฉัย</span>
+                    <p id="det-diagnosis" class="text-sm">-</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded"><span class="text-green-600 text-xs block">ยา</span>
+                    <p id="det-prescription" class="text-sm">-</p>
+                </div>
+                <div class="text-right pt-2"><span class="text-2xl font-bold text-teal-600" id="det-price">0</span> THB
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="walkInModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md relative">
+            <button onclick="document.getElementById('walkInModal').classList.add('hidden')"
+                class="absolute top-4 right-4"><i data-lucide="x"></i></button>
+            <h3 class="text-xl font-bold mb-4">ลงทะเบียน Walk-in</h3>
+            <form onsubmit="handleWalkIn(event)" class="space-y-3">
+                <input name="ownerName" placeholder="ชื่อเจ้าของ" required class="w-full border p-2 rounded-lg">
+                <div class="flex gap-2"><input name="petName" placeholder="ชื่อสัตว์เลี้ยง" required
+                        class="w-full border p-2 rounded-lg"><select name="petType" class="border p-2 rounded-lg">
+                        <option value="dog">สุนัข</option>
+                        <option value="cat">แมว</option>
+                    </select></div>
+                <div class="grid grid-cols-3 gap-2"><input name="breed" placeholder="พันธุ์"
+                        class="border p-2 rounded"><input name="weight" placeholder="นน."
+                        class="border p-2 rounded"><input name="height" placeholder="สูง" class="border p-2 rounded">
+                </div>
+                <textarea name="symptoms" placeholder="อาการ" required class="w-full border p-2 rounded-lg"></textarea>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg">บันทึก</button>
             </form>
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="bg-teal-600 p-1.5 rounded-lg text-white"><i data-lucide="paw-print"
+                                class="w-5 h-5"></i></div>
+                        <span class="text-xl font-extrabold text-white tracking-tight">อาเเงว Clinic</span>
+                    </div>
+                    <p class="text-sm text-slate-400 leading-relaxed">คลินิกรักษาสัตว์ที่ทันสมัยที่สุดในย่านนี้
+                        เราพร้อมดูแลเพื่อนซี้สี่ขาของคุณด้วยความรักและมาตรฐานวิชาชีพ</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">เมนูหลัก</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" onclick="goHome()" class="hover:text-teal-400 transition">หน้าแรก</a></li>
+                        <li><a href="#" onclick="scrollToSection('services')"
+                                class="hover:text-teal-400 transition">บริการของเรา</a></li>
+                        <li><a href="#" onclick="showAuthModal('login')"
+                                class="hover:text-teal-400 transition">เข้าสู่ระบบ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">ติดต่อเรา</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2"><i data-lucide="map-pin"
+                                class="w-4 h-4 mt-1 text-teal-500"></i><span>123 ถ.สุขุมวิท เขตวัฒนา<br>กรุงเทพมหานคร
+                                10110</span></li>
+                        <li class="flex items-center gap-2"><i data-lucide="phone"
+                                class="w-4 h-4 text-teal-500"></i><span>02-123-4567</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold mb-4 uppercase text-sm tracking-wider">ติดตามข่าวสาร</h4>
+                    <div class="flex gap-4"><a href="#"
+                            class="bg-slate-800 p-2 rounded-full hover:bg-teal-600 hover:text-white transition"><i
+                                data-lucide="facebook" class="w-5 h-5"></i></a><a href="#"
+                            class="bg-slate-800 p-2 rounded-full hover:bg-pink-500 hover:text-white transition"><i
+                                data-lucide="instagram" class="w-5 h-5"></i></a></div>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 pt-8 text-center text-sm text-slate-500">&copy; 2025 Ah-Ngaew Clinic.
+                All rights reserved.</div>
+        </div>
+    </footer>
 
     <script>
         lucide.createIcons();
         const API_URL = '/api';
-        
-        // --- 1. NAVIGATION & LAYOUT ---
+
+        // --- AUTH ---
         function goHome() {
-            const token = localStorage.getItem('token');
-            if(token) {
-                 document.getElementById('landing-page').classList.remove('hidden-section');
-                 document.getElementById('app-screen').classList.add('hidden-section');
-                 window.scrollTo(0,0);
-            } else {
-                 location.reload();
-            }
+            if (localStorage.getItem('token')) {
+                document.getElementById('landing-page').classList.remove('hidden-section');
+                document.getElementById('app-screen').classList.add('hidden-section');
+            } else location.reload();
         }
-
-        function scrollToSection(id) {
-            document.getElementById('landing-page').classList.remove('hidden-section');
-            document.getElementById('app-screen').classList.add('hidden-section');
-            document.getElementById(id).scrollIntoView({behavior: 'smooth'});
-        }
-
-        // --- 2. AUTH MODAL ---
-        function showAuthModal(mode = 'login', forcedRole = null) {
-            const modal = document.getElementById('authModal');
-            const content = document.getElementById('authModalContent');
-            
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-                content.classList.add('scale-100');
-            }, 10);
-            toggleAuthMode(mode);
-        }
-
-        function closeAuthModal() {
-            const modal = document.getElementById('authModal');
-            const content = document.getElementById('authModalContent');
-            modal.classList.add('opacity-0');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-            setTimeout(() => modal.classList.add('hidden'), 300);
-        }
-
+        function showAuthModal(mode) { document.getElementById('authModal').classList.remove('hidden'); toggleAuthMode(mode); }
         function toggleAuthMode(mode) {
-            if(mode === 'login') {
-                document.getElementById('authModalTitle').innerText = 'เข้าสู่ระบบ';
-                document.getElementById('loginForm').classList.remove('hidden-section');
-                document.getElementById('registerForm').classList.add('hidden-section');
-            } else {
-                document.getElementById('authModalTitle').innerText = 'สมัครสมาชิก';
-                document.getElementById('loginForm').classList.add('hidden-section');
-                document.getElementById('registerForm').classList.remove('hidden-section');
-            }
+            document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('authModalTitle').innerText = mode === 'login' ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก';
         }
-
-        // --- 3. API & LOGIC ---
-        // (Logic remains same, just updated UI classes inside render functions)
-
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const body = Object.fromEntries(new FormData(e.target));
-            try {
-                const res = await fetch(`${API_URL}/auth/register`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-                if(res.ok) { alert('✨ สมัครสมาชิกสำเร็จ!'); toggleAuthMode('login'); e.target.reset(); } 
-                else { const data = await res.json(); alert('Error: ' + (data.error || 'Failed')); }
-            } catch(err) { alert('Connection Error'); }
-        });
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const body = Object.fromEntries(new FormData(e.target));
-            try {
-                const res = await fetch(`${API_URL}/auth/login`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
-                const data = await res.json();
-                if(res.ok) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('role', data.role);
-                    localStorage.setItem('name', data.name);
-                    closeAuthModal();
-                    checkAuth(); 
-                } else { alert('Login Failed: ' + data.error); }
-            } catch(err) { alert('Connection Error'); }
+            const res = await fetch(`${API_URL}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
+            const data = await res.json();
+            if (res.ok) { localStorage.setItem('token', data.token); localStorage.setItem('role', data.role); localStorage.setItem('name', data.name); document.getElementById('authModal').classList.add('hidden'); checkAuth(); } else alert(data.error);
         });
-
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await fetch(`${API_URL}/auth/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(new FormData(e.target))) });
+            if (res.ok) { alert('สมัครสำเร็จ'); toggleAuthMode('login'); } else alert('Error');
+        });
         function logout() { localStorage.clear(); location.reload(); }
 
         function checkAuth() {
             const token = localStorage.getItem('token');
             const role = localStorage.getItem('role');
             const name = localStorage.getItem('name');
-
-            const navAuth = document.getElementById('nav-auth-buttons');
-            const navUser = document.getElementById('nav-user-info');
-            const landing = document.getElementById('landing-page');
-            const appScreen = document.getElementById('app-screen');
-
-            if(!token) {
-                navAuth.classList.remove('hidden');
-                navUser.classList.add('hidden');
-                landing.classList.remove('hidden-section');
-                appScreen.classList.add('hidden-section');
+            if (!token) {
+                document.getElementById('nav-user-info').classList.add('hidden');
+                document.getElementById('nav-auth-buttons').classList.remove('hidden');
                 return;
             }
-
-            navAuth.classList.add('hidden');
-            navUser.classList.remove('hidden');
-            navUser.classList.add('flex'); 
+            document.getElementById('nav-user-info').classList.remove('hidden');
+            document.getElementById('nav-user-info').style.display = 'flex';
+            document.getElementById('nav-auth-buttons').classList.add('hidden');
             document.getElementById('user-display-name').innerText = name;
-            document.getElementById('user-role-display').innerText = role === 'customer' ? 'สมาชิกทั่วไป' : (role === 'doctor' ? 'สัตวแพทย์' : 'เจ้าหน้าที่');
+            document.getElementById('user-role-display').innerText = role;
+            document.getElementById('landing-page').classList.add('hidden-section');
+            document.getElementById('app-screen').classList.remove('hidden-section');
+            ['customer', 'reception', 'doctor'].forEach(r => document.getElementById(`role-${r}`).classList.add('hidden-section'));
+            document.getElementById(`role-${role}`).classList.remove('hidden-section');
 
-            landing.classList.add('hidden-section');
-            appScreen.classList.remove('hidden-section');
-
-            ['customer', 'reception', 'doctor'].forEach(r => document.getElementById(`role-${r}`)?.classList.add('hidden-section'));
-            document.getElementById(`role-${role}`)?.classList.remove('hidden-section');
-            
-            if(role === 'customer') {
-                document.getElementById('cust-ownerName').value = name;
-                loadCustomerHistory();
+            // 🌟 Logic ซ่อน/แสดง ปุ่มจอคิว (Reception Only)
+            if (role === 'reception') {
+                document.getElementById('btn-queue-board').classList.remove('hidden');
+                document.getElementById('btn-queue-board').classList.add('flex');
             } else {
-                loadAppointments();
+                document.getElementById('btn-queue-board').classList.add('hidden');
+                document.getElementById('btn-queue-board').classList.remove('flex');
             }
+
+            if (role === 'customer') { document.getElementById('cust-ownerName').value = name; loadCustomerHistory(); } else { loadAppointments(); }
         }
 
         async function apiCall(endpoint, method = 'GET', body = null) {
             const token = localStorage.getItem('token');
             const opts = { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } };
-            if(body) opts.body = JSON.stringify(body);
-            try {
-                const res = await fetch(`${API_URL}${endpoint}`, opts);
-                if(res.status === 401 || res.status === 403) { logout(); return null; }
-                return res.json();
-            } catch(e) { console.error(e); return null; }
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch(`${API_URL}${endpoint}`, opts);
+            if (res.status === 401 || res.status === 403) { logout(); return null; }
+            return res.json();
         }
 
-        // Customer
+        // --- CUSTOMER ---
         async function handleBooking(e) {
             e.preventDefault();
-            const body = Object.fromEntries(new FormData(e.target));
-            const res = await apiCall('/appointments', 'POST', body);
-            if(res) {
-                alert('🎉 จองคิวสำเร็จแล้ว! ขอบคุณที่ไว้วางใจเราครับ');
-                e.target.reset();
-                document.getElementById('cust-ownerName').value = localStorage.getItem('name');
-                loadCustomerHistory();
-            } else { alert('Booking Failed'); }
+            await apiCall('/appointments', 'POST', Object.fromEntries(new FormData(e.target)));
+            alert('จองคิวสำเร็จ!'); e.target.reset(); document.getElementById('cust-ownerName').value = localStorage.getItem('name'); loadCustomerHistory();
         }
-
         async function loadCustomerHistory() {
             const data = await apiCall('/appointments');
-            const container = document.getElementById('customerHistory');
             const myName = localStorage.getItem('name');
-            if(!data) return;
-            const myApps = data.filter(d => d.ownerName === myName);
+            const container = document.getElementById('customerHistory');
             container.innerHTML = '';
-
-            if(myApps.length === 0) {
-                container.innerHTML = `<div class="p-8 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200 text-slate-400">ยังไม่มีประวัติการจอง</div>`;
-                return;
-            }
-
+            if (!data) return;
+            const myApps = data.filter(d => d.ownerName === myName).sort((a, b) => new Date(b.appointmentDate) - new Date(a.appointmentDate));
             myApps.forEach(app => {
-                let badge = 'bg-slate-100 text-slate-600';
-                let label = app.status;
-                if(app.status === 'pending') { badge = 'bg-yellow-100 text-yellow-700'; label = 'รอเช็คอิน'; }
-                else if(app.status === 'waiting') { badge = 'bg-teal-100 text-teal-700'; label = 'รอตรวจ'; }
-                else if(app.status === 'pharmacy') { badge = 'bg-purple-100 text-purple-700'; label = 'รอจ่ายยา'; }
-                else if(app.status === 'completed') { badge = 'bg-green-100 text-green-700'; label = 'เสร็จสิ้น'; }
-
+                const appJson = JSON.stringify(app).replace(/"/g, '&quot;');
+                // Create Queue Number
+                const qNo = 'Q' + String(app.id).padStart(3, '0');
                 container.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center hover:shadow-md transition">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-2xl">
-                                ${app.petType === 'dog' ? '🐶' : '🐱'}
-                            </div>
-                            <div>
-                                <div class="font-bold text-slate-800 text-lg">${app.petName}</div>
-                                <div class="text-xs text-slate-400 font-medium">${app.dateDisplay} • ${app.timeDisplay}</div>
-                                <div class="text-sm text-slate-500 mt-1 line-clamp-1">${app.symptoms}</div>
-                            </div>
+                    <div onclick="openDetails(${appJson})" class="glass-panel p-4 rounded-xl cursor-pointer hover:bg-white transition flex justify-between items-center border border-transparent hover:border-teal-200">
+                        <div>
+                            <div class="text-xs text-teal-600 font-bold mb-1">${qNo}</div>
+                            <div class="font-bold text-slate-800">${app.petName} <span class="text-xs text-slate-400">(${app.breed || '-'})</span></div>
+                            <div class="text-xs text-slate-500">${app.dateDisplay} @ ${app.timeDisplay}</div>
                         </div>
-                        <span class="${badge} text-xs px-3 py-1.5 rounded-full font-bold">${label}</span>
-                    </div>
-                `;
+                        <span class="text-xs bg-slate-100 px-2 py-1 rounded font-bold uppercase text-slate-500">${app.status}</span>
+                    </div>`;
             });
         }
 
-        // Staff & Doctor
+        // --- STAFF & DOCTOR ---
         async function loadAppointments() {
             const data = await apiCall('/appointments');
-            if(!data) return;
+            if (!data) return;
 
-            const stats = { pending:0, waiting:0, pharmacy:0, completed:0 };
-            const recTable = document.getElementById('receptionTable');
-            recTable.innerHTML = '';
-            
+            // 1. Calculate Stats from ALL data
+            const stats = { pending: 0, waiting: 0, pharmacy: 0, completed: 0 };
             data.forEach(app => {
-                if(stats[app.status] !== undefined) stats[app.status]++;
-                if(app.status === 'in_consult') stats.waiting++;
+                if (stats[app.status] !== undefined) stats[app.status]++;
+                if (app.status === 'in_consult') stats.waiting++;
+            });
 
-                let statusBadge = `<span class="bg-slate-100 px-3 py-1 rounded-full text-xs font-bold text-slate-500">${app.status}</span>`;
-                let action = '';
+            // 2. Sort Logic (เรียงคิว)
+            data.sort((a, b) => {
+                const statusOrder = { 'in_consult': 1, 'waiting': 2, 'pending': 3, 'pharmacy': 4, 'completed': 5 };
+                const sA = statusOrder[a.status] || 99;
+                const sB = statusOrder[b.status] || 99;
+                if (sA !== sB) return sA - sB;
 
-                if(app.status === 'pending') {
-                    statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-bold">รอเช็คอิน</span>`;
-                    action = `<button onclick="updateStatus(${app.id}, 'waiting')" class="text-teal-600 font-bold hover:bg-teal-50 px-3 py-1.5 rounded-lg transition">✔ เช็คอิน</button>`;
-                } else if(app.status === 'waiting') {
-                    statusBadge = `<span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-xs font-bold">รอตรวจ</span>`;
-                    action = `<span class="text-slate-300 text-xs italic">รอเรียก...</span>`;
-                } else if(app.status === 'in_consult') {
-                    statusBadge = `<span class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">กำลังตรวจ</span>`;
-                } else if(app.status === 'pharmacy') {
-                    statusBadge = `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">รอชำระเงิน</span>`;
-                    action = `<button onclick="if(confirm('รับเงิน ${app.price} บาท?')) updateStatus(${app.id}, 'completed')" class="text-purple-600 font-bold hover:bg-purple-50 px-3 py-1.5 rounded-lg transition">฿ รับเงิน</button>`;
-                } else {
-                    statusBadge = `<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">เสร็จสิ้น</span>`;
+                const dateA = new Date(a.appointmentDate || a.createdAt);
+                const dateB = new Date(b.appointmentDate || b.createdAt);
+                const dayA = new Date(dateA.getFullYear(), dateA.getMonth(), dateA.getDate()).getTime();
+                const dayB = new Date(dateB.getFullYear(), dateB.getMonth(), dateB.getDate()).getTime();
+                if (dayA !== dayB) return dayA - dayB;
+
+                const getTime = (item) => {
+                    if (item.timeSlot) {
+                        const [h, m] = item.timeSlot.split('-')[0].split(':');
+                        return parseInt(h) * 60 + parseInt(m);
+                    }
+                    const d = new Date(item.appointmentDate || item.createdAt);
+                    return d.getHours() * 60 + d.getMinutes();
+                };
+                const timeA = getTime(a);
+                const timeB = getTime(b);
+                if (timeA !== timeB) return timeA - timeB;
+
+                if (a.timeSlot && !b.timeSlot) return -1;
+                if (!a.timeSlot && b.timeSlot) return 1;
+
+                return a.id - b.id;
+            });
+
+            renderQueueBoard(data);
+
+            const searchTerm = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase() : '';
+            const filteredData = data.filter(app => `${app.ownerName} ${app.petName} ${app.phone || ''}`.toLowerCase().includes(searchTerm));
+
+            const tbody = document.getElementById('receptionTable');
+            if (tbody) tbody.innerHTML = '';
+
+            filteredData.forEach(app => {
+                if (tbody) {
+                    const appJson = JSON.stringify(app).replace(/"/g, '&quot;');
+                    const qNo = 'Q' + String(app.id).padStart(3, '0'); // Generate Queue Number
+                    let action = `<button onclick="openDetails(${appJson})" class="text-slate-400 text-xs hover:text-teal-600 font-bold border border-slate-200 px-2 py-1 rounded">ดูรายละเอียด</button>`;
+                    let statusBadge = '', statusLabel = '';
+
+                    switch (app.status) {
+                        case 'pending': statusBadge = 'bg-yellow-100 text-yellow-700 border-yellow-200'; statusLabel = 'รอเช็คอิน'; action = `<button onclick="updateStatus(${app.id}, 'waiting')" class="bg-teal-100 text-teal-700 font-bold hover:bg-teal-200 px-3 py-1 rounded text-sm transition">✔ เช็คอิน</button>`; break;
+                        case 'waiting': statusBadge = 'bg-blue-100 text-blue-700 border-blue-200'; statusLabel = 'รอตรวจ'; action = `<span class="text-xs text-slate-400 italic">รอหมอเรียก...</span>`; break;
+                        case 'in_consult': statusBadge = 'bg-indigo-100 text-indigo-700 border-indigo-200 animate-pulse'; statusLabel = 'กำลังตรวจ'; action = `<span class="text-xs text-indigo-400 font-medium">กำลังรักษา...</span>`; break;
+                        case 'pharmacy': statusBadge = 'bg-purple-100 text-purple-700 border-purple-200'; statusLabel = 'รอชำระเงิน'; action = `<button onclick="openPaymentModal(${app.id}, '${app.petName}', '${app.diagnosis?.replace(/'/g, "\\'")}', '${app.prescription?.replace(/'/g, "\\'")}')" class="bg-purple-600 text-white font-bold hover:bg-purple-700 px-3 py-1 rounded text-sm shadow-md transition">฿ คิดเงิน</button>`; break;
+                        case 'completed': statusBadge = 'bg-green-100 text-green-700 border-green-200'; statusLabel = 'เสร็จสิ้น'; break;
+                        default: statusBadge = 'bg-gray-100 text-gray-500'; statusLabel = app.status;
+                    }
+
+                    const typeBadge = app.isWalkIn ? `<span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 rounded ml-1 border border-indigo-200">Walk-in</span>` : `<span class="bg-teal-50 text-teal-600 text-[10px] px-1.5 rounded ml-1 border border-teal-200">Online</span>`;
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 border-b last:border-0 transition duration-150">
+                            <td class="p-4 text-sm font-extrabold text-teal-700">${qNo}</td> <!-- Queue No Col -->
+                            <td class="p-4 text-sm font-bold text-slate-700">${app.timeDisplay}<div class="mt-1">${typeBadge}</div></td>
+                            <td class="p-4 font-bold text-slate-700 cursor-pointer hover:text-teal-600" onclick="openDetails(${appJson})">${app.petName} <span class="text-xs font-normal text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-1">(${app.petType})</span></td>
+                            <td class="p-4 text-sm text-slate-500"><div class="flex flex-col"><span>${app.ownerName}</span><span class="text-xs text-slate-400">${app.breed || '-'} ${app.weight ? '/ ' + app.weight + 'kg' : ''}</span></div></td>
+                            <td class="p-4"><span class="px-2.5 py-1 rounded-full text-xs font-bold border ${statusBadge}">${statusLabel}</span></td>
+                            <td class="p-4 text-right space-x-2 flex justify-end items-center gap-2">${action}<button onclick="openDetails(${appJson})" class="text-slate-400 hover:text-teal-600 p-1 rounded-full hover:bg-slate-100 transition"><i data-lucide="info" class="w-4 h-4"></i></button></td>
+                        </tr>`;
                 }
-
-                recTable.innerHTML += `
-                    <tr class="hover:bg-slate-50 border-b border-slate-50 last:border-0 transition">
-                        <td class="p-5 text-sm">
-                            <div class="font-bold text-slate-700 mb-1">${app.timeDisplay}</div>
-                            ${statusBadge}
-                        </td>
-                        <td class="p-5">
-                            <div class="font-bold text-slate-800">${app.petName}</div>
-                            <div class="text-xs text-slate-400 font-medium bg-slate-100 inline-block px-1.5 rounded mt-0.5">${app.petType}</div>
-                        </td>
-                        <td class="p-5 text-slate-600 text-sm font-medium">${app.ownerName}</td>
-                        <td class="p-5 text-sm text-slate-500 max-w-xs truncate">${app.symptoms}</td>
-                        <td class="p-5 text-right">${action}</td>
-                    </tr>`;
             });
 
-            document.getElementById('stat-pending').innerText = stats.pending;
-            document.getElementById('stat-waiting').innerText = stats.waiting;
-            document.getElementById('stat-pharmacy').innerText = stats.pharmacy;
-            document.getElementById('stat-completed').innerText = stats.completed;
+            if (document.getElementById('stat-pending')) {
+                document.getElementById('stat-pending').innerText = stats.pending;
+                document.getElementById('stat-waiting').innerText = stats.waiting;
+                document.getElementById('stat-pharmacy').innerText = stats.pharmacy;
+                document.getElementById('stat-completed').innerText = stats.completed;
+            }
 
-            // Doctor List
             const docList = document.getElementById('doctorList');
-            docList.innerHTML = '';
-            const patients = data.filter(d => ['waiting', 'in_consult'].includes(d.status));
-            
-            if(patients.length === 0) docList.innerHTML = '<div class="p-10 text-slate-300 text-center flex flex-col items-center"><i data-lucide="coffee" class="w-10 h-10 mb-2 opacity-50"></i>ว่าง (ไม่มีคิว)</div>';
-            
-            patients.forEach(p => {
-                const isActive = document.getElementById('exam-id').value == p.id;
-                const activeClass = isActive ? 'bg-teal-50 border-teal-500' : 'hover:bg-slate-50 border-transparent';
-                
-                docList.innerHTML += `
-                    <div onclick="startExam(${p.id}, '${p.petName}', '${p.ownerName}')" class="p-4 mx-2 rounded-xl cursor-pointer border-l-4 transition mb-2 ${activeClass}">
-                        <div class="flex justify-between items-start mb-1">
-                            <div class="font-bold text-slate-800 text-lg">${p.petName}</div>
-                            <span class="text-xs bg-white border border-slate-100 px-2 py-0.5 rounded-md text-slate-500 font-mono">${p.timeDisplay}</span>
-                        </div>
-                        <div class="text-sm text-slate-500 mb-2">เจ้าของ: ${p.ownerName}</div>
-                        <div class="text-xs text-red-500 bg-red-50 inline-block px-2 py-1 rounded font-medium">${p.symptoms}</div>
-                    </div>`;
-            });
+            if (docList) {
+                docList.innerHTML = '';
+                const patients = filteredData.filter(d => ['waiting', 'in_consult'].includes(d.status));
+                if (patients.length === 0) docList.innerHTML = `<div class="p-8 text-center text-slate-400">ว่าง (ไม่มีคิว)</div>`;
+                patients.forEach(p => {
+                    const isActive = document.getElementById('exam-id').value == p.id;
+                    const activeClass = isActive ? 'bg-teal-50 border-l-4 border-teal-500' : 'hover:bg-slate-50 border-l-4 border-transparent';
+                    const qNo = 'Q' + String(p.id).padStart(3, '0');
+                    const typeLabel = p.isWalkIn ? '<span class="text-[10px] bg-indigo-50 text-indigo-600 px-1 rounded border border-indigo-100">Walk-in</span>' : '<span class="text-[10px] bg-teal-50 text-teal-600 px-1 rounded border border-teal-100">Online</span>';
+
+                    docList.innerHTML += `
+                        <div onclick="startExam(${p.id}, '${p.petName}', '${p.ownerName}', '${p.breed || ''}', '${p.weight || ''}', '${qNo}')" class="p-4 cursor-pointer border-b transition ${activeClass}">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="font-bold text-lg text-slate-800">${qNo} - ${p.petName}</span>
+                                <div class="text-right"><span class="text-xs bg-white border px-1.5 py-0.5 rounded text-slate-500 font-mono block mb-1">${p.timeDisplay}</span>${typeLabel}</div>
+                            </div>
+                            <div class="text-xs text-slate-500 mb-2">${p.breed || ''} (${p.weight || '-'}kg)</div>
+                            <div class="text-xs text-red-500 bg-red-50 px-2 py-1 rounded inline-block truncate max-w-full">${p.symptoms}</div>
+                        </div>`;
+                });
+            }
             lucide.createIcons();
         }
 
-        async function handleWalkIn(e) {
-            e.preventDefault();
-            const body = Object.fromEntries(new FormData(e.target));
-            body.isWalkIn = true;
-            await apiCall('/appointments', 'POST', body);
-            document.getElementById('walkInModal').classList.add('hidden');
-            loadAppointments();
+        // --- ACTIONS ---
+        async function updateStatus(id, status, extra = {}) { await apiCall(`/appointments/${id}/status`, 'PUT', { status, ...extra }); loadAppointments(); }
+        async function handleWalkIn(e) { e.preventDefault(); await apiCall('/appointments', 'POST', { ...Object.fromEntries(new FormData(e.target)), isWalkIn: true }); document.getElementById('walkInModal').classList.add('hidden'); loadAppointments(); }
+
+        // --- PAYMENT & DETAILS ---
+        function openPaymentModal(id, name, diag, rx) {
+            document.getElementById('paymentModal').classList.remove('hidden'); document.getElementById('pay-id').value = id;
+            document.getElementById('pay-subtitle').innerText = `ผู้ป่วย: ${name}`; document.getElementById('pay-diag').innerText = diag || '-'; document.getElementById('pay-rx').innerText = rx || '-'; document.getElementById('pay-price').value = '';
+        }
+        function closePaymentModal() { document.getElementById('paymentModal').classList.add('hidden'); }
+        async function submitPayment(e) { e.preventDefault(); await updateStatus(document.getElementById('pay-id').value, 'completed', { price: document.getElementById('pay-price').value }); closePaymentModal(); }
+
+        function openDetails(app) {
+            document.getElementById('detailsModal').classList.remove('hidden');
+            const qNo = 'Q' + String(app.id).padStart(3, '0');
+            document.getElementById('det-queueNo').innerText = qNo;
+            document.getElementById('det-petName').innerText = app.petName;
+            document.getElementById('det-petInfo').innerText = `${app.petType} / ${app.breed || '-'} / ${app.weight || '-'}kg / ${app.height || '-'}cm`;
+            document.getElementById('det-owner').innerText = app.ownerName;
+            document.getElementById('det-date').innerText = `${app.dateDisplay} ${app.timeDisplay}`;
+            document.getElementById('det-symptoms').innerText = app.symptoms;
+            document.getElementById('det-diagnosis').innerText = app.diagnosis || 'รอผลตรวจ';
+            document.getElementById('det-prescription').innerText = app.prescription || '-';
+            document.getElementById('det-price').innerText = app.price || '0';
         }
 
-        async function updateStatus(id, status, extras = {}) {
-            await apiCall(`/appointments/${id}/status`, 'PUT', { status, ...extras });
-            loadAppointments();
-        }
-
-        function startExam(id, pet, owner) {
+        // --- DOCTOR FLOW ---
+        function startExam(id, pet, owner, breed, weight, qNo) {
             updateStatus(id, 'in_consult');
-            document.getElementById('no-exam').classList.add('hidden');
-            document.getElementById('exam-room').classList.remove('hidden');
-            document.getElementById('exam-title').innerText = pet;
-            document.getElementById('exam-subtitle').innerText = `เจ้าของ: ${owner}`;
-            document.getElementById('exam-id').value = id;
-            loadAppointments(); 
-        }
-
-        async function submitExam() {
-            const id = document.getElementById('exam-id').value;
-            const diagnosis = document.getElementById('doc-diagnosis').value;
-            const prescription = document.getElementById('doc-prescription').value;
-            const price = document.getElementById('doc-price').value;
-            if(!price) return alert('กรุณาระบุค่ารักษา');
-            await updateStatus(id, 'pharmacy', { diagnosis, prescription, price });
-            cancelExam();
-            alert('บันทึกผลการรักษาเรียบร้อย');
-        }
-
-        function cancelExam() {
-            document.getElementById('no-exam').classList.remove('hidden');
-            document.getElementById('exam-room').classList.add('hidden');
-            document.querySelectorAll('#exam-room textarea, #exam-room input').forEach(i => i.value = '');
+            document.getElementById('no-exam').classList.add('hidden'); document.getElementById('exam-room').classList.remove('hidden');
+            document.getElementById('exam-title').innerText = `${qNo} - ${pet}`;
+            document.getElementById('exam-subtitle').innerText = owner;
+            document.getElementById('exam-details-mini').innerText = `${breed}, ${weight}kg`; document.getElementById('exam-id').value = id;
             loadAppointments();
+        }
+        async function submitExam() { await updateStatus(document.getElementById('exam-id').value, 'pharmacy', { diagnosis: document.getElementById('doc-diagnosis').value, prescription: document.getElementById('doc-prescription').value }); cancelExam(); alert('ส่งข้อมูลไปห้องยาเรียบร้อย'); }
+        function cancelExam() { document.getElementById('no-exam').classList.remove('hidden'); document.getElementById('exam-room').classList.add('hidden'); document.querySelectorAll('#exam-room textarea, #exam-room input').forEach(i => i.value = ''); loadAppointments(); }
+
+        // --- QUEUE BOARD LOGIC ---
+        function toggleQueueBoard() {
+            const board = document.getElementById('queueBoard');
+            if (board.classList.contains('hidden')) {
+                board.classList.remove('hidden');
+                if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+            } else {
+                board.classList.add('hidden');
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function renderQueueBoard(data) {
+            const current = data.find(d => d.status === 'in_consult');
+            const waiting = data.filter(d => d.status === 'waiting');
+            const pharmacy = data.filter(d => d.status === 'pharmacy');
+
+            const currentEl = document.getElementById('board-current');
+            if (current) {
+                const qNo = 'Q' + String(current.id).padStart(3, '0');
+                currentEl.innerHTML = `
+                    <div class="animate-pulse">
+                        <div class="text-6xl text-teal-300 font-bold mb-2">${qNo}</div>
+                        <h1 class="text-7xl md:text-8xl font-extrabold text-white mb-4 drop-shadow-[0_0_15px_rgba(45,212,191,0.5)]">${current.petName}</h1>
+                        <p class="text-3xl text-teal-200">เจ้าของ: ${current.ownerName}</p>
+                        <div class="mt-8 bg-teal-600 text-white text-2xl px-8 py-3 rounded-full inline-block font-bold shadow-lg">ห้องตรวจ 1</div>
+                    </div>`;
+            } else {
+                currentEl.innerHTML = `<div class="text-slate-600 text-4xl font-light">... รอเรียกคิว ...</div>`;
+            }
+
+            const waitingEl = document.getElementById('board-waiting');
+            waitingEl.innerHTML = waiting.length ? '' : '<div class="text-slate-500 italic p-4">ไม่มีคิวรอ</div>';
+            waiting.forEach(w => {
+                const qNo = 'Q' + String(w.id).padStart(3, '0');
+                waitingEl.innerHTML += `
+                    <div class="bg-slate-700 p-4 rounded-xl border-l-4 border-orange-500 flex justify-between items-center shadow-lg">
+                        <div><div class="text-xl font-bold text-orange-300">${qNo}</div><div class="text-2xl font-bold text-white">${w.petName}</div></div>
+                        <div class="text-xl font-mono text-slate-400">${w.timeDisplay}</div>
+                    </div>`;
+            });
+
+            const pharmacyEl = document.getElementById('board-pharmacy');
+            pharmacyEl.innerHTML = pharmacy.length ? '' : '<div class="text-slate-500 italic p-4">ไม่มีรายการ</div>';
+            pharmacy.forEach(p => {
+                const qNo = 'Q' + String(p.id).padStart(3, '0');
+                pharmacyEl.innerHTML += `
+                    <div class="bg-slate-700 p-4 rounded-xl border-l-4 border-purple-500 flex justify-between items-center shadow-lg">
+                        <div><div class="text-lg font-bold text-purple-300">${qNo}</div><div class="text-xl font-bold text-white">${p.petName}</div></div>
+                        <div class="text-purple-300 font-bold text-sm bg-purple-900/50 px-2 py-1 rounded">รอชำระเงิน</div>
+                    </div>`;
+            });
         }
 
         checkAuth();
         setInterval(() => {
             const role = localStorage.getItem('role');
-            if(role === 'reception' || role === 'doctor') loadAppointments();
-        }, 8000);
+            if (role === 'reception' || role === 'doctor') loadAppointments();
+            if (!document.getElementById('queueBoard').classList.contains('hidden')) loadAppointments();
+        }, 5000);
 
     </script>
 </body>
+
 </html>

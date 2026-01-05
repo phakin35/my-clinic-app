@@ -19,30 +19,36 @@ model User {
   username  String   @unique
   password  String
   name      String
-  role      String   @default("customer") // customer, reception, doctor
+  role      String   @default("customer")
   createdAt DateTime @default(now())
 }
 
 model Appointment {
-  id           Int      @id @default(autoincrement())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   
-  // ข้อมูลลูกค้าและสัตว์เลี้ยง
-  ownerName    String
-  petName      String
-  petType      String   // dog, cat, other
-  phone        String?
-  symptoms     String   @db.Text
+  // ข้อมูลเจ้าของ
+  ownerName       String
+  phone           String?
   
-  // ข้อมูลการนัดหมาย
+  // ข้อมูลสัตว์เลี้ยง (เพิ่มใหม่)
+  petName         String
+  petType         String
+  breed           String?  // พันธุ์
+  weight          String?  // น้ำหนัก
+  height          String?  // ส่วนสูง
+  symptoms        String   @db.Text
+  
+  // ข้อมูลนัดหมาย
   appointmentDate DateTime?
+  timeSlot        String?   // เก็บช่วงเวลา เช่น "09:00-09:30"
   isWalkIn        Boolean   @default(false)
   
-  // สถานะ: pending (รอมาถึง), waiting (รอตรวจ), in_consult (กำลังตรวจ), pharmacy (รอจ่ายยา), completed (เสร็จสิ้น)
+  // สถานะ
   status          String    @default("pending")
   
-  // ข้อมูลการรักษา (สำหรับหมอ)
+  // ข้อมูลการรักษา
   diagnosis       String?   @db.Text
   prescription    String?   @db.Text
   price           Float?    @default(0.0)
