@@ -137,6 +137,49 @@ app.put('/api/appointments/:id/status', authenticateToken, async (req, res) => {
     }
 });
 
+// --- API: Pets ---
+
+// ดึงข้อมูลนัดหมายทั้งหมด
+app.get('/api/pets', authenticateToken, async (req, res) => {
+    try {
+        const pets = await prisma.pet.findMany({
+            orderBy: { createdAt: 'desc' } // เรียงจากใหม่ไปเก่า
+        });
+
+        // จัดรูปแบบข้อมูลก่อนส่งกลับ
+        const formatted = pets.map(app => ({
+            ...app,
+            // ถ้ามี TimeSlot ให้ใช้ TimeSlot ถ้าไม่มีให้แปลงจาก Date
+            timeDisplay: app.timeSlot || (app.appointmentDate ? new Date(app.appointmentDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : 'Walk-in'),
+            dateDisplay: app.appointmentDate ? new Date(app.appointmentDate).toLocaleDateString('th-TH') : new Date().toLocaleDateString('th-TH')
+        }));
+        
+        res.json(formatted);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// สร้างสัตว์เลี้ยงใหม่ (เพิ่มข้อมูลสัตว์เลี้ยง)
+app.post('/api/pets', authenticateToken, async (req, res) => {
+    const { 
+        Pet_name, Pet_type, Pet_breed, Pet_weight, Pet_height
+    } = req.body;
+    
+    try {
+        const newItem = await prisma.pet.create({
+            data: {
+                Pet_name, Pet_type, 
+                Pet_breed, Pet_weight, Pet_height, // ฟิลด์ใหม่
+            }
+        });
+        res.json(newItem);
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: 'Failed to create pet data' });
+    }
+});
+
 // ใช้ Port จาก Environment หรือ 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
