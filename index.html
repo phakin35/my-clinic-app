@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>อาเเงว Clinic - คลินิกรักษาสัตว์แสนสุข</title>
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700;800&display=swap');
+
+        body { font-family: 'Sarabun', sans-serif; }
+        .hidden-section { display: none; }
+        
+        .hero-bg {
+            background-image: url('https://images.unsplash.com/photo-1548767797-d8c844163c4c?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        /* Queue Board */
+        .queue-board-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f172a; z-index: 9999; display: none;
+            color: white;
+        }
+
+        /* Receipt Printing */
+        #receipt-print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #receipt-print-area, #receipt-print-area * { visibility: visible; }
+            #receipt-print-area {
+                display: block !important;
+                position: absolute; left: 0; top: 0; width: 100%;
+                background: white;
+                padding: 10px;
+            }
+            /* Hide modal artifacts */
+            .swal2-container { display: none !important; }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-700 antialiased selection:bg-teal-100 selection:text-teal-900">
+
+    <!-- Navbar -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-teal-50 transition-all duration-300 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
+                    <div class="bg-gradient-to-br from-teal-400 to-teal-600 p-2.5 rounded-2xl text-white shadow-lg shadow-teal-200 group-hover:scale-105 transition duration-300">
+                        <i data-lucide="paw-print" class="w-6 h-6"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-2xl font-extrabold tracking-tight leading-none text-slate-800">อาเเงว Clinic</span>
+                        <span class="text-xs font-bold tracking-widest text-orange-500 uppercase">Cat & Dog Care</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:flex items-center gap-6">
+                    <!-- Guest Menu -->
+                    <div id="nav-guest-menu" class="flex items-center gap-6">
+                        <button onclick="goHome()" class="text-gray-500 hover:text-teal-600 font-bold text-sm uppercase">หน้าแรก</button>
+                        <button onclick="scrollToSection('services')" class="text-gray-500 hover:text-teal-600 font-bold text-sm uppercase">บริการ</button>
+                        <button onclick="scrollToSection('doctors')" class="text-gray-500 hover:text-teal-600 font-bold text-sm uppercase">ทีมแพทย์</button>
+                        <button onclick="openContactModal()" class="text-gray-500 hover:text-teal-600 font-bold text-sm uppercase">ติดต่อเรา</button>
+                    </div>
+
+                    <!-- Role Based Menu -->
+                    <div id="nav-role-menu" class="hidden flex items-center gap-4">
+                        <button onclick="goToDashboard()" class="text-teal-700 font-bold flex items-center gap-2">
+                            <i data-lucide="layout-dashboard" class="w-4 h-4"></i> แดชบอร์ด
+                        </button>
+                        <!-- Add Pet Button for Customer (On Navbar) -->
+                        <button id="nav-btn-add-pet" onclick="openModal('petModal')" class="hidden bg-orange-100 text-orange-600 hover:bg-orange-200 px-3 py-1.5 rounded-lg text-sm items-center gap-2 font-bold transition">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> เพิ่มข้อมูลสัตว์เลี้ยง
+                        </button>
+                        <button id="btn-queue-board" onclick="toggleQueueBoard()" class="hidden text-white bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-sm items-center gap-2">
+                            <i data-lucide="monitor" class="w-4 h-4"></i> จอเรียกคิว
+                        </button>
+                    </div>
+
+                    <!-- Auth Buttons -->
+                    <div id="nav-auth-guest" class="flex gap-3 ml-4 items-center">
+                        <button onclick="openModal('registerModal')" class="px-5 py-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white font-bold rounded-full shadow-lg hover:shadow-orange-300 hover:-translate-y-0.5 transition flex items-center gap-2 text-sm">
+                            <i data-lucide="calendar-plus" class="w-4 h-4"></i> จองคิวออนไลน์
+                        </button>
+                        <div class="h-6 w-px bg-gray-300 mx-2"></div>
+                        <button onclick="openModal('loginModal')" class="text-slate-600 font-bold hover:text-teal-600 text-sm">เข้าสู่ระบบ (ลูกค้า)</button>
+                        <button onclick="openModal('loginModal', 'staff')" class="text-slate-400 hover:text-blue-600 text-sm flex items-center gap-1">
+                            <i data-lucide="shield-check" class="w-4 h-4"></i> เจ้าหน้าที่
+                        </button>
+                    </div>
+
+                    <!-- User Info (Logged In) -->
+                    <div id="nav-auth-user" class="hidden flex items-center gap-4 ml-4 pl-6 border-l border-gray-200">
+                        <div class="text-right">
+                            <div id="user-display-name" class="text-sm font-bold text-slate-800">User</div>
+                            <div id="user-role-display" class="text-xs font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full inline-block">Customer</div>
+                        </div>
+                        <button onclick="logout()" class="bg-slate-100 hover:bg-red-50 hover:text-red-500 p-2.5 rounded-full text-slate-400 transition shadow-sm">
+                            <i data-lucide="log-out" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <!-- 1. Landing Page -->
+        <div id="landing-page" class="animate-fade-in">
+            <header class="hero-bg h-[600px] relative flex items-center">
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-teal-900/40 to-transparent"></div>
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+                    <div class="max-w-2xl space-y-6">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-semibold shadow-lg">
+                            <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span> เปิดให้บริการทุกวัน
+                        </div>
+                        <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight drop-shadow-sm">
+                            เพื่อนซี้สี่ขา <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-200 to-teal-400">เราดูแลด้วยใจ</span>
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-200 font-light max-w-lg leading-relaxed">
+                            คลินิกที่เข้าใจทั้งสัตว์เลี้ยงและเจ้าของ ด้วยเครื่องมือทันสมัยและทีมแพทย์ผู้เชี่ยวชาญ
+                        </p>
+                        <div class="pt-6 flex flex-col sm:flex-row gap-4">
+                            <button onclick="checkAuthAndBook()" class="bg-teal-500 hover:bg-teal-400 text-white text-lg font-bold py-4 px-10 rounded-full shadow-xl shadow-teal-900/30 transition transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                                <i data-lucide="calendar-check"></i> จองคิวตรวจ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <section id="services" class="py-24 bg-slate-50">
+                <div class="max-w-7xl mx-auto px-4 text-center">
+                    <h2 class="text-4xl font-extrabold text-slate-800 mb-12">บริการของเรา</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl transition">
+                            <div class="w-16 h-16 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-6 mx-auto"><i data-lucide="stethoscope" class="w-8 h-8"></i></div>
+                            <h3 class="text-2xl font-bold mb-3">ตรวจรักษาทั่วไป</h3>
+                            <p class="text-slate-600">ตรวจโรค อายุรกรรม วัคซีน ถ่ายพยาธิ</p>
+                        </div>
+                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl transition">
+                            <div class="w-16 h-16 bg-orange-100 text-orange-500 rounded-2xl flex items-center justify-center mb-6 mx-auto"><i data-lucide="scissors" class="w-8 h-8"></i></div>
+                            <h3 class="text-2xl font-bold mb-3">ผ่าตัด & ทำหมัน</h3>
+                            <p class="text-slate-600">ห้องผ่าตัดมาตรฐาน ปลอดภัย หายห่วง</p>
+                        </div>
+                        <div class="glass-panel p-8 rounded-3xl shadow-sm hover:shadow-xl transition">
+                            <div class="w-16 h-16 bg-blue-100 text-blue-500 rounded-2xl flex items-center justify-center mb-6 mx-auto"><i data-lucide="heart-pulse" class="w-8 h-8"></i></div>
+                            <h3 class="text-2xl font-bold mb-3">X-Ray & Lab</h3>
+                            <p class="text-slate-600">วิเคราะห์ผลเลือดและเอกซเรย์ดิจิตอล</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 2. Application Dashboard -->
+        <div id="app-dashboard" class="hidden-section max-w-7xl mx-auto p-4 md:p-8 min-h-screen">
+            
+            <!-- A. Customer View (Updated: Split History) -->
+            <section id="view-customer" class="hidden-section fade-in">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Booking Form -->
+                    <div class="lg:w-1/3">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg border-t-4 border-teal-500 sticky top-24">
+                            <h2 class="text-2xl font-bold text-teal-800 mb-6 flex items-center gap-2">
+                                <i data-lucide="calendar-plus"></i> จองคิวตรวจ
+                            </h2>
+                            <form onsubmit="handleCustomerBooking(event)" class="space-y-4">
+                                <div class="space-y-1">
+                                    <label class="text-sm font-bold text-slate-600">ชื่อเจ้าของ</label>
+                                    <input type="text" id="cust-ownerName" name="ownerName" readonly class="w-full bg-slate-100 border-0 rounded-lg p-2.5 text-slate-500 text-sm cursor-not-allowed">
+                                </div>
+                                <div class="bg-teal-50/50 p-3 rounded-xl border border-teal-100">
+                                    <label class="text-xs font-bold text-teal-700 mb-1.5 block">เลือกสัตว์เลี้ยงของคุณ</label>
+                                    <select id="cust-pet-select" onchange="fillPetInfo(this.value)" class="w-full border border-teal-200 p-2 rounded-lg bg-white outline-none focus:ring-2 focus:ring-teal-500 mb-2">
+                                        <option value="" disabled selected>-- กรุณาเลือก --</option>
+                                    </select>
+                                    <p class="text-xs text-slate-400 italic">เลือกจากประวัติเดิม หรือ กด "เพิ่มข้อมูลสัตว์เลี้ยง" ด้านบนเพื่อกรอกใหม่</p>
+                                </div>
+
+                                <!-- Readonly / Auto-filled Pet Info -->
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="space-y-1">
+                                        <label class="text-sm font-bold text-slate-600">ชื่อสัตว์เลี้ยง</label>
+                                        <input name="petName" id="bk-petName" required class="w-full border p-2 rounded-lg bg-slate-50" readonly>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-sm font-bold text-slate-600">ประเภท</label>
+                                        <input name="petType" id="bk-petType" required class="w-full border p-2 rounded-lg bg-slate-50" readonly>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <div class="space-y-1">
+                                        <label class="text-xs font-bold text-slate-500">พันธุ์</label>
+                                        <input name="breed" id="bk-breed" class="w-full border p-2 rounded-lg text-sm bg-slate-50" readonly>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-xs font-bold text-slate-500">นน.(kg)</label>
+                                        <input name="weight" id="bk-weight" class="w-full border p-2 rounded-lg text-sm bg-slate-50">
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-xs font-bold text-slate-500">สูง(cm)</label>
+                                        <input name="height" id="bk-height" class="w-full border p-2 rounded-lg text-sm bg-slate-50">
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-slate-200 pt-3">
+                                    <div class="space-y-1 mb-3">
+                                        <label class="text-sm font-bold text-slate-600">เบอร์โทรศัพท์ (ติดต่อกลับ)</label>
+                                        <input type="tel" id="cust-phone" required class="w-full border p-2 rounded-lg" placeholder="08xxxxxxxx">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 mb-3">
+                                        <div class="space-y-1">
+                                            <label class="text-sm font-bold text-slate-600">วันที่</label>
+                                            <input type="date" id="cust-date" required class="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-teal-500">
+                                        </div>
+                                        <div class="space-y-1">
+                                            <label class="text-sm font-bold text-slate-600">ช่วงเวลา</label>
+                                            <select id="cust-time" required class="w-full border p-2 rounded-lg bg-white outline-none focus:ring-2 focus:ring-teal-500">
+                                                <option value="" disabled selected>เลือก...</option>
+                                                <option value="09:00-09:30">09:00-09:30</option>
+                                                <option value="09:30-10:00">09:30-10:00</option>
+                                                <option value="10:00-10:30">10:00-10:30</option>
+                                                <option value="10:30-11:00">10:30-11:00</option>
+                                                <option value="11:00-11:30">11:00-11:30</option>
+                                                <option value="13:00-13:30">13:00-13:30</option>
+                                                <option value="13:30-14:00">13:30-14:00</option>
+                                                <option value="14:00-14:30">14:00-14:30</option>
+                                                <option value="14:30-15:00">14:30-15:00</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <label class="text-sm font-bold text-slate-600">อาการเบื้องต้น</label>
+                                        <textarea id="cust-symptom" rows="2" placeholder="ระบุอาการ..." class="w-full border p-2 rounded-lg outline-none focus:ring-2 focus:ring-teal-500"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700 shadow-lg transition">ยืนยันการจอง</button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- History (Split into 2 parts) -->
+                    <div class="lg:w-2/3 space-y-8">
+                        <!-- 1. Upcoming Appointments -->
+                        <div>
+                            <h2 class="text-xl font-bold text-teal-700 mb-3 flex items-center gap-2 border-b border-teal-200 pb-2">
+                                <i data-lucide="calendar-clock" class="w-5 h-5"></i> นัดหมายเร็วๆ นี้ / นัดต่อไป
+                            </h2>
+                            <div id="customer-upcoming-list" class="space-y-3">
+                                <!-- JS Injected -->
+                            </div>
+                        </div>
+
+                        <!-- 2. Past History -->
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-600 mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+                                <i data-lucide="history" class="w-5 h-5"></i> ประวัติการรักษาที่ผ่านมา
+                            </h2>
+                            <div id="customer-history-list" class="space-y-3 opacity-80">
+                                <!-- JS Injected -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- B. Reception View -->
+            <section id="view-reception" class="hidden-section fade-in">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800">ผู้ช่วย / การเงิน</h2>
+                        <p class="text-slate-500">จัดการคิว ลงทะเบียน และรับชำระเงิน</p>
+                    </div>
+                    <button onclick="openModal('walkInModal')" class="bg-indigo-600 text-white px-6 py-2.5 rounded-full font-bold shadow hover:bg-indigo-700 flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i> ลงทะเบียน Walk-in
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-4 gap-4 mb-6">
+                    <div class="glass-panel p-4 rounded-2xl border-l-4 border-yellow-400">
+                        <div class="text-xs text-slate-500 font-bold uppercase">รอเช็คอิน</div>
+                        <div class="text-3xl font-bold text-yellow-600" id="stat-pending">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border-l-4 border-blue-500">
+                        <div class="text-xs text-slate-500 font-bold uppercase">รอตรวจ</div>
+                        <div class="text-3xl font-bold text-blue-600" id="stat-waiting">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border-l-4 border-purple-500">
+                        <div class="text-xs text-slate-500 font-bold uppercase">รอชำระเงิน</div>
+                        <div class="text-3xl font-bold text-purple-600" id="stat-pharmacy">0</div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-2xl border-l-4 border-green-500">
+                        <div class="text-xs text-slate-500 font-bold uppercase">เสร็จสิ้น</div>
+                        <div class="text-3xl font-bold text-green-600" id="stat-completed">0</div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 flex gap-4">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-3 text-slate-400 w-5 h-5"></i>
+                            <input type="text" id="reception-search" onkeyup="renderReceptionTable()" placeholder="ค้นหาชื่อเจ้าของ, ชื่อสัตว์เลี้ยง..." class="w-full pl-10 pr-4 py-2 border rounded-xl bg-slate-50">
+                        </div>
+                        <select id="reception-filter" onchange="renderReceptionTable()" class="border rounded-xl px-4 bg-slate-50">
+                            <option value="all">ทั้งหมด</option>
+                            <option value="today" selected>วันนี้</option>
+                        </select>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 text-slate-500 text-sm font-bold uppercase">
+                            <tr>
+                                <th class="p-4">เวลา</th>
+                                <th class="p-4">เจ้าของ</th>
+                                <th class="p-4">สัตว์เลี้ยง</th>
+                                <th class="p-4">ประเภท</th>
+                                <th class="p-4">สถานะ</th>
+                                <th class="p-4 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reception-table-body" class="divide-y divide-slate-100">
+                            <!-- JS Generates this -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- C. Doctor View -->
+            <section id="view-doctor" class="hidden-section fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[80vh]">
+                    <!-- Queue List -->
+                    <div class="bg-white rounded-2xl shadow border flex flex-col">
+                        <div class="p-4 bg-teal-50 border-b font-bold text-teal-800 flex justify-between items-center">
+                            <span><i data-lucide="list" class="inline w-4 h-4"></i> คิวรอตรวจ</span>
+                            <div class="flex items-center gap-2">
+                                <label class="text-xs text-teal-600 flex items-center gap-1 cursor-pointer">
+                                    <input type="checkbox" id="doc-filter-my" onchange="renderDoctorQueue()" class="rounded text-teal-600"> เฉพาะของฉัน
+                                </label>
+                                <button onclick="renderDoctorQueue()" class="text-xs bg-white px-2 py-1 rounded shadow text-teal-600 hover:bg-teal-100"><i data-lucide="refresh-cw" class="w-3 h-3"></i></button>
+                            </div>
+                        </div>
+                        <div id="doctor-queue-list" class="divide-y overflow-y-auto flex-1 p-2 space-y-2">
+                            <!-- JS Generates -->
+                        </div>
+                    </div>
+
+                    <!-- Exam Room -->
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow border flex flex-col relative">
+                        <div id="doc-empty-state" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+                            <i data-lucide="stethoscope" class="w-20 h-20 mb-4 opacity-30"></i>
+                            <p class="text-lg">เลือกคนไข้จากรายการเพื่อเริ่มตรวจ</p>
+                        </div>
+
+                        <div id="doc-exam-form" class="hidden flex flex-col h-full">
+                            <div class="p-6 border-b bg-blue-50 flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-xl font-bold text-blue-900" id="exam-pet-name">...</h3>
+                                    <p class="text-sm text-slate-500"><span id="exam-pet-breed">...</span> | <span id="exam-pet-weight">...</span> kg</p>
+                                    <p class="text-sm text-slate-500" id="exam-owner-name">...</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-white border px-3 py-1 rounded text-sm text-slate-500" id="exam-symptom">...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-6 space-y-6 flex-1 overflow-y-auto">
+                                <input type="hidden" id="exam-appt-id">
+                                <div>
+                                    <label class="block font-bold mb-2 text-slate-700">ผลการวินิจฉัย (Diagnosis)</label>
+                                    <textarea id="exam-diagnosis" class="w-full border p-4 rounded-xl h-32 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition" placeholder="ระบุผลการตรวจร่างกาย..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block font-bold mb-2 text-slate-700">สั่งจ่ายยา / ค่ารักษา (Treatment & Rx)</label>
+                                    <textarea id="exam-treatment" class="w-full border p-4 rounded-xl h-32 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 transition" placeholder="ระบุรายการยา และหัตถการ..."></textarea>
+                                </div>
+                                
+                                <!-- ส่วนนัดหมายครั้งต่อไป -->
+                                <div class="border p-4 rounded-xl bg-blue-50/50 mt-4 border-blue-100">
+                                    <h4 class="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                                        <i data-lucide="calendar-days" class="w-4 h-4"></i> นัดหมายครั้งต่อไป (Follow-up)
+                                    </h4>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="text-xs font-bold text-slate-500 mb-1 block">วันที่</label>
+                                            <input type="date" id="exam-next-date" class="w-full border p-2 rounded-lg bg-white">
+                                        </div>
+                                        <div>
+                                            <label class="text-xs font-bold text-slate-500 mb-1 block">เวลา</label>
+                                            <select id="exam-next-time" class="w-full border p-2 rounded-lg bg-white">
+                                                <option value="">ไม่ระบุ</option>
+                                                <option value="09:00-09:30">09:00</option>
+                                                <option value="09:30-10:00">09:30</option>
+                                                <option value="10:00-10:30">10:00</option>
+                                                <option value="10:30-11:00">10:30</option>
+                                                <option value="11:00-11:30">11:00</option>
+                                                <option value="13:00-13:30">13:00</option>
+                                                <option value="13:30-14:00">13:30</option>
+                                                <option value="14:00-14:30">14:00</option>
+                                                <option value="14:30-15:00">14:30</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="exam-next-note" class="w-full border p-2 rounded-lg mt-2 bg-white text-sm" placeholder="ระบุสาเหตุการนัด (เช่น ฟังผลเลือด, ตัดไหม)">
+                                </div>
+                            </div>
+
+                            <div class="p-4 border-t bg-gray-50 flex justify-end gap-3">
+                                <button onclick="closeExamRoom()" class="px-6 py-2 text-slate-500 hover:bg-gray-200 rounded-lg font-bold">ยกเลิก</button>
+                                <button onclick="saveExamResult()" class="bg-blue-600 text-white px-8 py-2 rounded-lg font-bold shadow hover:bg-blue-700 flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i> บันทึกส่งห้องยา
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- D. Admin View -->
+            <section id="view-admin" class="hidden-section fade-in">
+                <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-200">
+                    <h2 class="text-3xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <i data-lucide="settings" class="text-red-500"></i> ผู้ดูแลระบบ (Admin)
+                    </h2>
+                    
+                    <!-- Tabs -->
+                    <div class="flex border-b mb-6 gap-6">
+                        <button onclick="switchAdminTab('users')" id="tab-btn-users" class="px-4 py-2 font-bold text-red-600 border-b-2 border-red-600">จัดการผู้ใช้งาน</button>
+                        <button onclick="switchAdminTab('appts')" id="tab-btn-appts" class="px-4 py-2 font-bold text-slate-400 hover:text-red-500">รายการนัดหมายทั้งหมด</button>
+                    </div>
+
+                    <!-- Content: Users -->
+                    <div id="admin-tab-users">
+                        <div class="flex justify-end mb-4">
+                            <button onclick="openModal('registerModal')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-slate-700">
+                                <i data-lucide="user-plus" class="w-4 h-4"></i> เพิ่มผู้ใช้งาน
+                            </button>
+                        </div>
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-100">
+                                <tr>
+                                    <th class="p-3 rounded-l-lg">Username</th>
+                                    <th class="p-3">ชื่อ</th>
+                                    <th class="p-3">Role</th>
+                                    <th class="p-3 rounded-r-lg text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-user-list" class="divide-y"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Content: Appts -->
+                    <div id="admin-tab-appts" class="hidden-section">
+                        <button onclick="clearAllData()" class="mb-4 text-xs text-red-500 hover:underline">Reset System Data (Debug)</button>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="p-3">ID</th>
+                                        <th class="p-3">วันที่/เวลา</th>
+                                        <th class="p-3">คนไข้</th>
+                                        <th class="p-3">สถานะ</th>
+                                        <th class="p-3 text-right">ราคา</th>
+                                        <th class="p-3 text-right">ดู</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-appt-list" class="divide-y"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- === MODALS === -->
+
+    <!-- Contact Modal -->
+    <div id="contactModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-fade-in text-center">
+            <button onclick="closeModal('contactModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">ติดต่อเรา</h2>
+            <div class="space-y-4 text-slate-600">
+                <div class="flex items-center justify-center gap-3">
+                    <div class="bg-green-100 p-3 rounded-full text-green-600"><i data-lucide="phone"></i></div>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold">โทรศัพท์</div>
+                        <div class="font-bold text-lg">02-999-9999</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-3">
+                    <div class="bg-blue-100 p-3 rounded-full text-blue-600"><i data-lucide="map-pin"></i></div>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold">ที่อยู่</div>
+                        <div>123 ถนนคนรักสัตว์ กทม. 10400</div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center gap-3">
+                    <div class="bg-purple-100 p-3 rounded-full text-purple-600"><i data-lucide="clock"></i></div>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold">เวลาทำการ</div>
+                        <div>ทุกวัน 09:00 - 20:00 น.</div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeModal('contactModal')" class="mt-8 w-full bg-slate-100 text-slate-600 font-bold py-3 rounded-lg hover:bg-slate-200">ปิดหน้าต่าง</button>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center" id="login-title">เข้าสู่ระบบ</h2>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="text" id="login-user" placeholder="ชื่อผู้ใช้ (Username)" class="w-full border p-3 rounded-lg bg-slate-50" required>
+                <input type="password" id="login-pass" placeholder="รหัสผ่าน (Password)" class="w-full border p-3 rounded-lg bg-slate-50" required>
+                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg hover:bg-teal-700">เข้าสู่ระบบ</button>
+            </form>
+            <div class="mt-4 text-center text-sm text-slate-500">
+                ยังไม่มีบัญชี? <a href="#" onclick="closeModal('loginModal'); openModal('registerModal')" class="text-teal-600 font-bold hover:underline">สมัครสมาชิก</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="registerModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('registerModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">สมัครสมาชิก</h2>
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <input type="text" id="reg-name" placeholder="ชื่อ-นามสกุล" class="w-full border p-3 rounded-lg" required>
+                <input type="text" id="reg-user" placeholder="Username" class="w-full border p-3 rounded-lg" required>
+                <input type="password" id="reg-pass" placeholder="Password" class="w-full border p-3 rounded-lg" required>
+                <select id="reg-role" class="w-full border p-3 rounded-lg bg-slate-50">
+                    <option value="customer">ลูกค้า (Customer)</option>
+                    <option value="reception">ผู้ช่วย/เวชระเบียน (Assistant)</option>
+                    <option value="doctor">สัตวแพทย์ (Doctor)</option>
+                    <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                </select>
+                <button type="submit" class="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600">สมัครสมาชิก</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pet Modal -->
+    <div id="petModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('petModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold text-teal-800 mb-4 text-center">เพิ่มสัตว์เลี้ยง</h2>
+            <form onsubmit="handleAddPet(event)" class="space-y-3">
+                <input type="text" id="pet-name" placeholder="ชื่อน้องๆ" class="w-full border p-3 rounded-lg" required>
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="pet-type" class="w-full border p-3 rounded-lg" required>
+                        <option value="Dog">สุนัข</option>
+                        <option value="Cat">แมว</option>
+                        <option value="Exotic">อื่นๆ</option>
+                    </select>
+                    <input type="text" id="pet-breed" placeholder="สายพันธุ์" class="w-full border p-3 rounded-lg">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" id="pet-age" placeholder="อายุ (ปี)" class="w-full border p-3 rounded-lg">
+                    <input type="number" id="pet-weight" placeholder="น้ำหนัก (กก.)" class="w-full border p-3 rounded-lg">
+                </div>
+                <button type="submit" class="w-full bg-teal-600 text-white font-bold py-3 rounded-lg mt-2">บันทึก</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Walk-in Modal -->
+    <div id="walkInModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('walkInModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-2xl font-bold text-indigo-800 mb-4">ลงทะเบียน Walk-in</h2>
+            <form onsubmit="handleWalkIn(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-600">ชื่อเจ้าของ</label>
+                    <input type="text" id="walk-owner" class="w-full border p-2 rounded" required placeholder="Guest Name">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600">เบอร์โทรศัพท์</label>
+                    <input type="text" id="walk-phone" class="w-full border p-2 rounded" placeholder="08xxxxxxxx">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600">ชื่อสัตว์เลี้ยง</label>
+                        <input type="text" id="walk-pet" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-600">ประเภท</label>
+                        <select id="walk-type" class="w-full border p-2 rounded">
+                            <option value="Dog">สุนัข</option><option value="Cat">แมว</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-600">อาการ</label>
+                    <input type="text" id="walk-symptom" class="w-full border p-2 rounded" required>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg">ยืนยันลงทะเบียน</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment/Receipt Modal (Compact) -->
+    <div id="paymentModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-2xl shadow-2xl relative animate-fade-in overflow-hidden flex flex-col h-[90vh]">
+            <div class="bg-slate-800 text-white p-4 flex justify-between items-center no-print shrink-0">
+                <h2 class="font-bold flex items-center gap-2"><i data-lucide="receipt"></i> คิดเงิน / ใบเสร็จรับเงิน</h2>
+                <button onclick="closeModal('paymentModal')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-y-auto bg-slate-50 flex flex-col justify-center">
+                <!-- Receipt Preview (Compact for A5/Slip) -->
+                <div id="receipt-preview" class="border p-6 rounded-none bg-white shadow-md mx-auto w-[148mm] min-h-[100px]">
+                    <!-- Content injected by JS -->
+                </div>
+            </div>
+
+            <!-- Footer with Input and Buttons (Fixed at bottom) -->
+            <div class="p-4 bg-white border-t no-print shrink-0">
+                <div class="flex gap-4 items-end mb-4">
+                    <div class="flex-1">
+                        <label class="text-xs font-bold text-slate-600 block mb-1">ระบุค่ารักษา (บาท):</label>
+                        <input type="number" id="billing-cost-input" class="w-full border border-teal-500 p-3 rounded-lg text-xl font-bold text-right text-teal-700 bg-teal-50 focus:ring-2 focus:ring-teal-500 outline-none" placeholder="0.00" onkeyup="updateReceiptTotal()">
+                    </div>
+                    <button onclick="updateReceiptTotal()" class="bg-teal-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-teal-700 h-[52px]">ยืนยันยอด</button>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                    <button onclick="printReceipt()" class="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-100 font-bold flex items-center gap-2 text-sm">
+                        <i data-lucide="printer" class="w-4 h-4"></i> พิมพ์ใบเสร็จ
+                    </button>
+                    <button onclick="confirmPayment()" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-bold flex items-center gap-2 text-sm shadow-lg shadow-green-200">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i> รับชำระเงินเรียบร้อย
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal (New) -->
+    <div id="detailModal" class="fixed inset-0 bg-black/50 z-[60] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl relative animate-fade-in">
+            <button onclick="closeModal('detailModal')" class="absolute top-4 right-4 text-slate-400 hover:text-red-500"><i data-lucide="x"></i></button>
+            <h2 class="text-xl font-bold text-slate-800 mb-4 border-b pb-2">รายละเอียดการนัดหมาย</h2>
+            <div id="detail-content" class="space-y-3 text-sm">
+                <!-- Content Injected -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Board (TV View) -->
+    <div id="queueBoard" class="queue-board-overlay p-8">
+        <div class="h-full flex flex-col">
+            <div class="flex justify-between items-center mb-8 border-b border-slate-700 pb-4">
+                <h1 class="text-5xl font-bold text-teal-400">คิวการรักษา (Queue)</h1>
+                <div class="text-right">
+                    <div class="text-3xl font-bold" id="clock">00:00</div>
+                    <div class="text-slate-400">อาเเงว Clinic</div>
+                </div>
+                <button onclick="toggleQueueBoard()" class="absolute top-4 right-4 text-slate-600 hover:text-white p-2">✕</button>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-8 h-full">
+                <!-- Calling -->
+                <div class="bg-slate-800 rounded-3xl p-6 border border-slate-700">
+                    <h2 class="text-3xl font-bold text-yellow-400 mb-6 flex items-center gap-3">
+                        <span class="w-4 h-4 rounded-full bg-yellow-400 animate-pulse"></span> กำลังเรียก (Calling)
+                    </h2>
+                    <div id="queue-calling-list" class="space-y-4">
+                        <!-- Items -->
+                    </div>
+                </div>
+                <!-- Waiting -->
+                <div class="bg-slate-800/50 rounded-3xl p-6 border border-slate-700">
+                    <h2 class="text-3xl font-bold text-blue-400 mb-6">รอตรวจ (Waiting)</h2>
+                    <div id="queue-waiting-list" class="space-y-4">
+                        <!-- Items -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Print Area -->
+    <div id="receipt-print-area"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

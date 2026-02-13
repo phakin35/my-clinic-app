@@ -32,24 +32,24 @@ model Appointment {
   ownerName       String
   phone           String?
   
-  // ข้อมูลสัตว์เลี้ยง (เพิ่มใหม่)
+  // ข้อมูลสัตว์เลี้ยง
   petName         String
   petType         String
-  breed           String?  // พันธุ์
-  weight          String?  // น้ำหนัก
-  height          String?  // ส่วนสูง
+  breed           String?
+  weight          String?
+  height          String?
   symptoms        String   @db.Text
   
   // ข้อมูลนัดหมาย
   appointmentDate DateTime?
-  timeSlot        String?   // เก็บช่วงเวลา เช่น "09:00-09:30"
+  timeSlot        String?
   isWalkIn        Boolean   @default(false)
   
-  // สถานะ
+  // สถานะ (pending, waiting, examining, pharmacy, completed, cancelled)
   status          String    @default("pending")
   
-  // ข้อมูลการรักษา
-  diagnosis       String?   @db.Text
-  prescription    String?   @db.Text
-  price           Float?    @default(0.0)
+  // ข้อมูลการรักษา (สำคัญ! ต้องมีส่วนนี้หมอถึงจะบันทึกผ่าน)
+  diagnosis       String?   @db.Text  // ผลวินิจฉัย
+  prescription    String?   @db.Text  // การรักษา/ยา
+  cost            String?             // ค่าใช้จ่าย (ให้ผู้ช่วยกรอก หรือหมอระบุมา)
 }

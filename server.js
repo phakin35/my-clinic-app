@@ -1,167 +1,164 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // เพิ่ม: เรียกใช้ module path
 const { PrismaClient } = require('@prisma/client');
-const path = require('path');
-const jwt = require('jsonwebtoken');
 
 const app = express();
-const prisma = new PrismaClient();
-const SECRET_KEY = "happypet-secret-key-change-this"; 
+const prisma = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'], // เปิด Log เพื่อดูการทำงานของ Database
+});
+const PORT = 3000;
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors()); // อนุญาตให้หน้าเว็บ (index.html) เรียกใช้งาน API ได้
+app.use(express.json()); // รองรับการรับข้อมูลแบบ JSON
 
-// Middleware
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return res.sendStatus(401);
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-};
+// --- สำคัญ: ตั้งค่าให้ Server อ่านไฟล์หน้าเว็บ (HTML/JS) ---
+app.use(express.static(__dirname));
 
-// Middleware for Admin Check
-const isAdmin = (req, res, next) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Admin access required' });
-    next();
-};
+// Route สำหรับหน้าแรก (ถ้าเข้า localhost:3000 ให้ส่ง index.html)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// --- AUTH ---
-app.post('/api/auth/register', async (req, res) => {
-    const { username, password, name, role } = req.body;
+// --- ROUTES (API) ---
+
+// 1. Register (สมัครสมาชิก)
+app.post('/api/register', async (req, res) => {
+    console.log("➡️ Register Request:", req.body);
     try {
+        const { username, password, name, role } = req.body;
+        
+        // Validation ง่ายๆ
+        if (!username || !password || !name) {
+            throw new Error("ข้อมูลไม่ครบถ้วน (Username, Password, Name จำเป็นต้องมี)");
+        }
+
         const user = await prisma.user.create({
-            data: { username, password, name, role: role || 'customer' }
+            data: { 
+                username, 
+                password, 
+                name, 
+                role: role || 'customer' // ถ้าไม่ส่ง role มา ให้เป็น customer
+            }
         });
-        res.json({ message: 'User created' });
-    } catch (e) {
-        res.status(400).json({ error: 'Username already exists' });
+        console.log("✅ Register Success ID:", user.id);
+        res.json({ success: true, user });
+    } catch (error) {
+        console.error("❌ Register Error:", error.message);
+        // P2002 คือรหัส Error ของ Prisma กรณีข้อมูลซ้ำ (Unique constraint failed)
+        if (error.code === 'P2002') {
+            return res.status(400).json({ success: false, error: 'Username นี้ถูกใช้งานแล้ว' });
+        }
+        res.status(400).json({ success: false, error: 'ระบบผิดพลาด: ' + error.message });
     }
 });
 
-app.post('/api/auth/login', async (req, res) => {
-    const { username, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { username } });
-    if (!user || user.password !== password) return res.status(400).json({ error: 'Invalid credentials' });
-    const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, SECRET_KEY);
-    res.json({ token, role: user.role, name: user.name });
-});
-
-// --- USERS (ADMIN ONLY) ---
-app.get('/api/users', authenticateToken, isAdmin, async (req, res) => {
-    const users = await prisma.user.findMany({ orderBy: { id: 'desc' } });
-    res.json(users);
-});
-
-app.delete('/api/users/:id', authenticateToken, isAdmin, async (req, res) => {
+// 2. Login (เข้าสู่ระบบ)
+app.post('/api/login', async (req, res) => {
     try {
-        await prisma.user.delete({ where: { id: parseInt(req.params.id) } });
-        res.json({ message: 'User deleted' });
-    } catch (e) {
-        res.status(500).json({ error: 'Failed to delete' });
+        const { username, password } = req.body;
+        const user = await prisma.user.findUnique({
+            where: { username }
+        });
+
+        if (user && user.password === password) {
+            console.log(`✅ Login Success: ${username}`);
+            res.json({ success: true, user });
+        } else {
+            console.warn(`⚠️ Login Failed: ${username}`);
+            res.status(401).json({ success: false, error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+        }
+    } catch (error) {
+        console.error("❌ Login Error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// --- APPOINTMENTS ---
-
-// Get All
-app.get('/api/appointments', authenticateToken, async (req, res) => {
+// 3. Get All Appointments (ดึงรายการนัดหมายทั้งหมด)
+app.get('/api/appointments', async (req, res) => {
     try {
         const appointments = await prisma.appointment.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: { createdAt: 'desc' } // เรียงจากใหม่ไปเก่า
         });
-        const formatted = appointments.map(app => ({
-            ...app,
-            timeDisplay: app.timeSlot || (app.appointmentDate ? new Date(app.appointmentDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : 'Walk-in'),
-            dateDisplay: app.appointmentDate ? new Date(app.appointmentDate).toLocaleDateString('th-TH') : new Date().toLocaleDateString('th-TH')
-        }));
-        res.json(formatted);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.json(appointments);
+    } catch (error) {
+        console.error("❌ Fetch Appointments Error:", error);
+        res.status(500).json({ error: "ไม่สามารถดึงข้อมูลได้: " + error.message });
     }
 });
 
-// Create
-app.post('/api/appointments', authenticateToken, async (req, res) => {
-    const { 
-        ownerName, petName, petType, breed, weight, height, 
-        phone, symptoms, date, timeSlot, isWalkIn 
-    } = req.body;
-    
-    let appointmentDate = new Date();
-    if (date) appointmentDate = new Date(date);
-
+// 4. Create Appointment (จองคิว / นัดหมาย)
+app.post('/api/appointments', async (req, res) => {
+    console.log("➡️ Booking Request:", req.body);
     try {
-        const newItem = await prisma.appointment.create({
+        const { 
+            ownerName, phone, 
+            petName, petType, breed, weight, height, symptoms,
+            appointmentDate, timeSlot, isWalkIn, status
+        } = req.body;
+
+        // เช็คข้อมูลสำคัญ
+        if (!ownerName || !petName || !petType || !symptoms) {
+             throw new Error("ข้อมูลสำคัญไม่ครบ (ชื่อเจ้าของ, ชื่อสัตว์เลี้ยง, ประเภท, อาการ)");
+        }
+
+        // แปลงวันที่ (ถ้ามี)
+        let validDate = null;
+        if (appointmentDate) {
+            validDate = new Date(appointmentDate);
+            if (isNaN(validDate.getTime())) {
+                validDate = null; 
+            }
+        }
+
+        const newAppt = await prisma.appointment.create({
             data: {
-                ownerName, petName, petType, breed, weight, height,
-                phone, symptoms, isWalkIn: isWalkIn || false,
-                appointmentDate, timeSlot,
-                status: isWalkIn ? 'waiting' : 'pending'
+                ownerName, 
+                phone: phone || '', 
+                petName, 
+                petType, 
+                breed: breed || '', 
+                weight: weight || '', 
+                height: height || '', 
+                symptoms,
+                appointmentDate: validDate,
+                timeSlot: timeSlot || '', 
+                isWalkIn: isWalkIn || false, 
+                status: status || 'pending'
             }
         });
-        res.json(newItem);
-    } catch (e) {
-        res.status(500).json({ error: 'Failed' });
+        
+        console.log("✅ Booking Created ID:", newAppt.id);
+        res.json({ success: true, data: newAppt });
+    } catch (error) {
+        console.error("❌ Booking Error:", error);
+        res.status(500).json({ success: false, error: "บันทึกไม่สำเร็จ: " + error.message });
     }
 });
 
-// Update Status (Staff/Doctor)
-app.put('/api/appointments/:id/status', authenticateToken, async (req, res) => {
-    const { id } = req.params;
-    const { status, diagnosis, prescription, price } = req.body;
+// 5. Update Appointment (อัปเดตสถานะ / บันทึกผลตรวจ / จ่ายเงิน)
+app.put('/api/appointments/:id', async (req, res) => {
     try {
-        const updateData = { status };
-        if (diagnosis !== undefined) updateData.diagnosis = diagnosis;
-        if (prescription !== undefined) updateData.prescription = prescription;
-        if (price !== undefined) updateData.price = parseFloat(price);
+        const { id } = req.params;
+        const data = req.body; // รับข้อมูลที่จะแก้มาเป็น Object เลย
+        console.log(`➡️ Update ID ${id} with:`, data);
 
         const updated = await prisma.appointment.update({
             where: { id: parseInt(id) },
-            data: updateData
+            data: data
         });
-        res.json(updated);
-    } catch (e) {
-        res.status(500).json({ error: 'Failed' });
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        console.error("❌ Update Error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// Admin: Edit Full Appointment Info
-app.put('/api/appointments/:id', authenticateToken, isAdmin, async (req, res) => {
-    const { id } = req.params;
-    const { ownerName, petName, date, timeSlot, status, symptoms } = req.body;
-    try {
-        let appointmentDate = undefined;
-        if (date) appointmentDate = new Date(date);
-
-        const updated = await prisma.appointment.update({
-            where: { id: parseInt(id) },
-            data: { 
-                ownerName, petName, timeSlot, status, symptoms,
-                ...(appointmentDate && { appointmentDate })
-            }
-        });
-        res.json(updated);
-    } catch (e) {
-        res.status(500).json({ error: 'Update failed' });
-    }
-});
-
-// Admin: Delete Appointment
-app.delete('/api/appointments/:id', authenticateToken, isAdmin, async (req, res) => {
-    try {
-        await prisma.appointment.delete({ where: { id: parseInt(req.params.id) } });
-        res.json({ message: 'Deleted' });
-    } catch (e) {
-        res.status(500).json({ error: 'Failed' });
-    }
-});
-
-const PORT = process.env.PORT || 3000;
+// --- Start Server ---
 app.listen(PORT, () => {
-    console.log(`Server running at port ${PORT}`);
+    console.log(`---------------------------------------------------`);
+    console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    console.log(`📦 Database: Connected via Prisma`);
+    console.log(`🌐 Website: Open http://localhost:${PORT} in your browser`); // เพิ่มข้อความแนะนำ
+    console.log(`---------------------------------------------------`);
 });
